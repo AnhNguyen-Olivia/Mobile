@@ -1,0 +1,1698 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>composables-recomposition-lazylist-student-lab.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> or <div class="page"></div> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="lab-composable-functions-recomposition-and-lazylist-in-jetpack-compose">Lab: Composable Functions, Recomposition, and LazyList in Jetpack Compose</h1>
+<h2 id="abbreviations-used-in-this-document">Abbreviations used in this document</h2>
+<table>
+<thead>
+<tr>
+<th>Abbreviation</th>
+<th>Full term</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>UI</td>
+<td>User Interface</td>
+</tr>
+<tr>
+<td>API</td>
+<td>Application Programming Interface</td>
+</tr>
+<tr>
+<td>SDK</td>
+<td>Software Development Kit</td>
+</tr>
+<tr>
+<td>DSL</td>
+<td>Domain-Specific Language</td>
+</tr>
+<tr>
+<td>XML</td>
+<td>Extensible Markup Language</td>
+</tr>
+<tr>
+<td>JSON</td>
+<td>JavaScript Object Notation</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Based on:</strong> https://developer.android.com/develop/ui/compose/mental-model
+<strong>You will need:</strong> Android Studio with an Android SDK installed, and a running emulator or physical device — no other setup.
+<strong>Projects used in this lab:</strong> <code>Display0</code>, <code>IncreasingCounter</code>, <code>ChangeName</code> (imperative/Views) and <code>JetPackDisplay0</code>, <code>JetPackIncreasingCounter</code>, <code>JetPackChangeName</code>, <code>JetPackListPeople</code> (declarative/Compose) — all under <code>MobileProgramming26/labs/</code>. Each project folder has its own README with build/run instructions.</p>
+<p>By the end of this lab you will have compared the imperative (Views) and declarative (Compose) way of building the same three simple apps, traced exactly how and when Compose recomposes, defined a Kotlin <code>data class</code> and converted a list of them to/from JSON, and used <code>LazyColumn</code> to display a scrollable list.</p>
+<hr>
+<h2 id="table-of-contents">Table of contents</h2>
+<ul>
+<li><a href="#learning-objectives">Learning objectives</a></li>
+<li><a href="#1-from-imperative-to-declarative">1. From imperative to declarative</a>
+<ul>
+<li><a href="#11-the-problem-with-the-imperative-model">1.1 The problem with the imperative model</a></li>
+<li><a href="#12-the-declarative-model">1.2 The declarative model</a></li>
+<li><a href="#13-recap">1.3 Recap</a></li>
+</ul>
+</li>
+<li><a href="#2-composable-functions-anatomy-and-rules">2. Composable functions: anatomy and rules</a>
+<ul>
+<li><a href="#21-anatomy-of-a-composable-function">2.1 Anatomy of a composable function</a></li>
+<li><a href="#22-the-three-golden-rules">2.2 The three golden rules</a></li>
+<li><a href="#23-a-snippet-to-think-about">2.3 A snippet to think about</a></li>
+</ul>
+</li>
+<li><a href="#3-the-simplest-composable-jetpackdisplay0">3. The simplest composable: <code>JetPackDisplay0</code></a></li>
+<li><a href="#4-state-and-recomposition-the-counter">4. State and recomposition: the counter</a>
+<ul>
+<li><a href="#41-the-imperative-way-increasingcounter">4.1 The imperative way: <code>IncreasingCounter</code></a></li>
+<li><a href="#42-the-declarative-way-jetpackincreasingcounter">4.2 The declarative way: <code>JetPackIncreasingCounter</code></a></li>
+<li><a href="#43-remember-and-mutableintstateof">4.3 <code>remember</code> and <code>mutableIntStateOf</code></a></li>
+<li><a href="#44-tracing-a-recomposition">4.4 Tracing a recomposition</a></li>
+<li><a href="#45-why-doesnt-the-whole-function-reset">4.5 Why doesn't the whole function &quot;reset&quot;?</a></li>
+</ul>
+</li>
+<li><a href="#5-two-independent-pieces-of-state-changing-a-name">5. Two independent pieces of state: changing a name</a>
+<ul>
+<li><a href="#51-the-imperative-way-changename">5.1 The imperative way: <code>ChangeName</code></a></li>
+<li><a href="#52-the-declarative-way-jetpackchangename">5.2 The declarative way: <code>JetPackChangeName</code></a></li>
+<li><a href="#53-two-independent-state-variables">5.3 Two independent state variables</a></li>
+<li><a href="#54-the-central-idea">5.4 The central idea</a></li>
+</ul>
+</li>
+<li><a href="#6-golden-rules-of-recomposition">6. Golden rules of recomposition</a>
+<ul>
+<li><a href="#61-never-rely-on-side-effects">6.1 Never rely on side effects</a></li>
+<li><a href="#62-recomposition-is-optimistic-and-can-be-canceled">6.2 Recomposition is optimistic and can be canceled</a></li>
+<li><a href="#63-composable-functions-run-often-avoid-expensive-work">6.3 Composable functions run often — avoid expensive work</a></li>
+<li><a href="#64-never-write-to-local-variables-during-composition">6.4 Never write to local variables during composition</a></li>
+<li><a href="#65-execution-order-isnt-guaranteed">6.5 Execution order isn't guaranteed</a></li>
+</ul>
+</li>
+<li><a href="#7-summary">7. Summary</a></li>
+<li><a href="#8-kotlin-data-types-and-building-a-jsonarray-of-people">8. Kotlin data types, and building a <code>JSONArray</code> of people</a>
+<ul>
+<li><a href="#81-basic-kotlin-data-types">8.1 Basic Kotlin data types</a></li>
+<li><a href="#82-data-class-modeling-one-record">8.2 <code>data class</code>: modeling one record</a></li>
+<li><a href="#83-from-a-listperson-to-a-jsonarray">8.3 From a <code>List&lt;Person&gt;</code> to a <code>JSONArray</code></a></li>
+<li><a href="#84-going-back-jsonarray-to-listperson">8.4 Going back: <code>JSONArray</code> to <code>List&lt;Person&gt;</code></a></li>
+</ul>
+</li>
+<li><a href="#9-introducing-lazy--lazycolumn">9. Introducing <code>Lazy</code> / <code>LazyColumn</code></a></li>
+<li><a href="#additional-material">Additional material</a>
+<ul>
+<li><a href="#a1-the-observer-pattern">A1. The Observer pattern</a></li>
+<li><a href="#a2-the-delegation-pattern-and-kotlins-by">A2. The Delegation pattern and Kotlin's <code>by</code></a></li>
+<li><a href="#a3-the-same-three-apps-in-vanilla-javascript">A3. The same three apps in vanilla JavaScript</a></li>
+<li><a href="#a4-the-same-three-apps-in-react">A4. The same three apps in React</a></li>
+<li><a href="#a5-the-same-three-apps-in-swiftui">A5. The same three apps in SwiftUI</a></li>
+<li><a href="#a6-the-same-three-apps-in-flutter">A6. The same three apps in Flutter</a></li>
+<li><a href="#a7-lazycolumnlazyrow-and-the-key-parameter">A7. <code>LazyColumn</code>/<code>LazyRow</code> and the <code>key</code> parameter</a></li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="learning-objectives">Learning objectives</h2>
+<p>By the end of this material, you should be able to:</p>
+<ol>
+<li>Explain the difference between the imperative model (traditional Views) and the declarative model (Compose).</li>
+<li>Write a simple <code>@Composable</code> function and explain its rules (fast, idempotent, side-effect free).</li>
+<li>Explain what triggers a recomposition and why Compose can &quot;skip&quot; parts of the UI tree.</li>
+<li>Identify incorrect code (with side effects) inside a composable and fix it.</li>
+<li>Define a <code>data class</code> for a simple record and convert a <code>List</code> of them to/from a <code>JSONArray</code>/<code>JSONObject</code>.</li>
+<li>Use <code>LazyColumn</code> to display a list, and explain why (and how) its recomposition is scoped per-row rather than to the whole list.</li>
+</ol>
+<hr>
+<h2 id="1-from-imperative-to-declarative">1. From imperative to declarative</h2>
+<h3 id="11-the-problem-with-the-imperative-model">1.1 The problem with the imperative model</h3>
+<p>In the classic Android model (Views/XML), the UI is a tree of stateful widgets. Updating it requires:</p>
+<ul>
+<li>Finding the widget with <code>findViewById()</code>.</li>
+<li>Calling mutator methods: <code>button.setText(...)</code>, <code>img.setImageBitmap(...)</code>, <code>container.addChild(view)</code>.</li>
+</ul>
+<p><strong>Live example: <code>Display0</code> (the imperative-Views version of <code>JetPackDisplay0</code>)</strong></p>
+<p>File: <code>Display0/app/src/main/res/layout/activity_main.xml</code></p>
+<pre class="hljs"><code><div><span class="hljs-tag">&lt;<span class="hljs-name">FrameLayout</span> <span class="hljs-attr">xmlns:android</span>=<span class="hljs-string">&quot;http://schemas.android.com/apk/res/android&quot;</span>
+    <span class="hljs-attr">android:layout_width</span>=<span class="hljs-string">&quot;match_parent&quot;</span>
+    <span class="hljs-attr">android:layout_height</span>=<span class="hljs-string">&quot;match_parent&quot;</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">TextView</span>
+        <span class="hljs-attr">android:id</span>=<span class="hljs-string">&quot;@+id/numberText&quot;</span>
+        <span class="hljs-attr">android:layout_width</span>=<span class="hljs-string">&quot;wrap_content&quot;</span>
+        <span class="hljs-attr">android:layout_height</span>=<span class="hljs-string">&quot;wrap_content&quot;</span>
+        <span class="hljs-attr">android:layout_gravity</span>=<span class="hljs-string">&quot;center&quot;</span>
+        <span class="hljs-attr">android:text</span>=<span class="hljs-string">&quot;0&quot;</span>
+        <span class="hljs-attr">android:textSize</span>=<span class="hljs-string">&quot;72sp&quot;</span> /&gt;</span>
+
+<span class="hljs-tag">&lt;/<span class="hljs-name">FrameLayout</span>&gt;</span>
+</div></code></pre>
+<p>File: <code>Display0/app/src/main/java/com/example/display0/MainActivity.kt</code></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">class</span> <span class="hljs-title class_">MainActivity</span> : <span class="hljs-type">AppCompatActivity</span>() {
+    <span class="hljs-keyword">override</span> <span class="hljs-function"><span class="hljs-keyword">fun</span> <span class="hljs-title">onCreate</span><span class="hljs-params">(savedInstanceState: <span class="hljs-type">Bundle</span>?)</span></span> {
+        <span class="hljs-keyword">super</span>.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+    }
+}
+</div></code></pre>
+<p><code>Display0</code> and <code>JetPackDisplay0</code> produce the <strong>exact same result</strong>: a &quot;0&quot; centered on screen at 72sp. But the way they get there is fundamentally different:</p>
+<ul>
+<li>Here, the UI is defined in a separate XML file (<code>activity_main.xml</code>) as a <strong>tree of widget objects</strong> (<code>FrameLayout</code>, <code>TextView</code>) that get instantiated and kept alive in memory.</li>
+<li><code>setContentView(R.layout.activity_main)</code> inflates that XML into real <code>View</code> objects once, at startup.</li>
+<li>If we wanted this &quot;0&quot; to change later, we would need to grab a reference to the widget — <code>findViewById&lt;TextView&gt;(R.id.numberText)</code> — and imperatively call <code>numberText.text = newValue</code>. The layout file itself never changes; we'd be mutating the live widget object.</li>
+</ul>
+<p><strong>Problems with this approach:</strong></p>
+<ul>
+<li>It's easy to forget to update a view if the same data is shown in multiple places (e.g. two different <code>TextView</code>s both showing &quot;0&quot;).</li>
+<li>The order of updates can cause illegal or inconsistent states.</li>
+<li>Complexity grows fast with the number of views — manually keeping &quot;state → UI&quot; in sync by hand doesn't scale.</li>
+</ul>
+<p><em>Discussion question:</em> Have you ever had a bug where part of the screen didn't update because you forgot to call a <code>setText</code>? Or where two views showed contradictory data?</p>
+<h3 id="12-the-declarative-model">1.2 The declarative model</h3>
+<p>The industry (React, Flutter, SwiftUI, Compose) has shifted to a declarative model:</p>
+<ul>
+<li>Instead of mutating the UI step by step, <strong>you describe how the UI should look for a given state</strong>.</li>
+<li>Conceptually, Compose &quot;regenerates the entire screen from scratch&quot; every time state changes.</li>
+<li>Since regenerating everything would be computationally expensive, Compose applies <strong>intelligent recomposition</strong>: it only re-executes the parts that actually depend on the data that changed.</li>
+</ul>
+<p><strong>Data flow diagram:</strong></p>
+<pre class="hljs"><code><div>App logic (ViewModel / state)
+        ↓
+Top-level composable function
+        ↓
+Child composable functions
+        ↓
+UI elements on screen
+</div></code></pre>
+<p><strong>Flow when the user interacts:</strong></p>
+<pre class="hljs"><code><div>User interaction (tap, text input, etc.)
+        → UI event (onClick, onValueChange...)
+        → App logic updates the state
+        → Compose calls the affected composable functions again
+        → The UI is &quot;redrawn&quot; (recomposition)
+</div></code></pre>
+<h3 id="13-recap">1.3 Recap</h3>
+<p>Comparison of <code>Display0</code> vs. <code>JetPackDisplay0</code>:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Imperative (<code>Display0</code>)</th>
+<th>Declarative (<code>JetPackDisplay0</code>)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Where the UI is defined</td>
+<td><code>activity_main.xml</code> (separate file)</td>
+<td><code>DisplayZero()</code> function (Kotlin code)</td>
+</tr>
+<tr>
+<td>Widgets</td>
+<td>Stateful <code>View</code> objects, expose getters/setters (<code>numberText.text = ...</code>)</td>
+<td>Relatively stateless — no getter/setter functions</td>
+</tr>
+<tr>
+<td>Updates</td>
+<td>You'd mutate the widget by hand via <code>findViewById</code></td>
+<td>You describe the UI based on current state; Compose redraws it</td>
+</tr>
+<tr>
+<td>Architecture</td>
+<td>Direct widget manipulation</td>
+<td>State flows down, events flow up</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="2-composable-functions-anatomy-and-rules">2. Composable functions: anatomy and rules</h2>
+<h3 id="21-anatomy-of-a-composable-function">2.1 Anatomy of a composable function</h3>
+<pre class="hljs"><code><div><span class="hljs-meta">@Composable</span>
+<span class="hljs-function"><span class="hljs-keyword">fun</span> <span class="hljs-title">Greeting</span><span class="hljs-params">(name: <span class="hljs-type">String</span>)</span></span> {
+    Text(<span class="hljs-string">&quot;Hello <span class="hljs-variable">$name</span>&quot;</span>)
+}
+</div></code></pre>
+<p>Key points:</p>
+<ol>
+<li><strong>The <code>@Composable</code> annotation:</strong> tells the Compose compiler that this function transforms data into UI. It enables the special compiler plugin Compose needs.</li>
+<li><strong>It takes data as parameters</strong>: the app logic &quot;passes in&quot; the state it needs to display (<code>name</code>).</li>
+<li><strong>It calls other composable functions</strong>: <code>Greeting</code> composes its UI by calling <code>Text</code>. This is how the UI tree is built: composables calling composables.</li>
+<li><strong>It doesn't return anything</strong> (implicit <code>Unit</code>): a composable doesn't return a widget, it <strong>describes</strong> how part of the UI should look.</li>
+<li><strong>It can use Kotlin freely</strong>: <code>if</code> statements, <code>for</code> loops, helper functions.</li>
+</ol>
+<pre class="hljs"><code><div><span class="hljs-meta">@Composable</span>
+<span class="hljs-function"><span class="hljs-keyword">fun</span> <span class="hljs-title">Greeting</span><span class="hljs-params">(names: <span class="hljs-type">List</span>&lt;<span class="hljs-type">String</span>&gt;)</span></span> {
+    <span class="hljs-keyword">for</span> (name <span class="hljs-keyword">in</span> names) {
+        Text(<span class="hljs-string">&quot;Hello <span class="hljs-variable">$name</span>&quot;</span>)
+    }
+}
+</div></code></pre>
+<h3 id="22-the-three-golden-rules">2.2 The three golden rules</h3>
+<p>Every composable function should be:</p>
+<ul>
+<li><strong>Fast:</strong> it may run many times per second (e.g. during an animation), so it must not do expensive work (I/O, network, disk) directly.</li>
+<li><strong>Idempotent:</strong> calling it multiple times with the same arguments must always produce the same result / the same UI.</li>
+<li><strong>Side-effect free:</strong> it must not modify global variables, properties of shared objects, <code>SharedPreferences</code>, or anything outside its own scope.</li>
+</ul>
+<p><em>Why it matters:</em> if Compose decides to skip or cancel a recomposition (as part of its optimizations), any side effect inside the composable might not run, might run too many times, or might run against an inconsistent state. This is explored further in section 6.</p>
+<h3 id="23-a-snippet-to-think-about">2.3 A snippet to think about</h3>
+<p>Look at this snippet and ask yourself: does mutating <code>items</code> inside this composable violate the rules above? Would you write code like this?</p>
+<pre class="hljs"><code><div><span class="hljs-meta">@Composable</span>
+<span class="hljs-function"><span class="hljs-keyword">fun</span> <span class="hljs-title">ListWithBug</span><span class="hljs-params">(myList: <span class="hljs-type">List</span>&lt;<span class="hljs-type">String</span>&gt;)</span></span> {
+    <span class="hljs-keyword">var</span> items = <span class="hljs-number">0</span>
+    Column {
+        <span class="hljs-keyword">for</span> (item <span class="hljs-keyword">in</span> myList) {
+            Text(<span class="hljs-string">&quot;Item: <span class="hljs-variable">$item</span>&quot;</span>)
+            items++   <span class="hljs-comment">// &lt;-- is mutating a variable here a problem?</span>
+        }
+    }
+    Text(<span class="hljs-string">&quot;Count: <span class="hljs-variable">$items</span>&quot;</span>)
+}
+</div></code></pre>
+<p>Flag the <code>items++</code> line as &quot;the kind of thing the side-effect-free rule warns about&quot; and sit with some discomfort about it — section 6.4 revisits this exact snippet and explains what's really going on.</p>
+<hr>
+<h2 id="3-the-simplest-composable-jetpackdisplay0">3. The simplest composable: <code>JetPackDisplay0</code></h2>
+<p>File: <code>JetPackDisplay0/app/src/main/java/com/example/jetpackdisplay0/MainActivity.kt</code></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">class</span> <span class="hljs-title class_">MainActivity</span> : <span class="hljs-type">ComponentActivity</span>() {
+    <span class="hljs-keyword">override</span> <span class="hljs-function"><span class="hljs-keyword">fun</span> <span class="hljs-title">onCreate</span><span class="hljs-params">(savedInstanceState: <span class="hljs-type">Bundle</span>?)</span></span> {
+        <span class="hljs-keyword">super</span>.onCreate(savedInstanceState)
+        setContent {
+            DisplayZero()
+        }
+    }
+}
+
+<span class="hljs-meta">@Composable</span>
+<span class="hljs-function"><span class="hljs-keyword">fun</span> <span class="hljs-title">DisplayZero</span><span class="hljs-params">()</span></span> {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text(text = <span class="hljs-string">&quot;0&quot;</span>, fontSize = <span class="hljs-number">72.</span>sp)
+    }
+}
+</div></code></pre>
+<p>Points to notice:</p>
+<ul>
+<li><code>setContent { }</code> is the bridge between the <code>Activity</code> world (imperative) and the Compose world (declarative). Everything inside it is a <strong>composable tree</strong>.</li>
+<li><code>DisplayZero</code> is the root composable of the screen: it takes no parameters, has no state, and always renders the same thing. It's the simplest possible example of &quot;describing the UI&quot;.</li>
+<li><code>Box</code> and <code>Text</code> are composables provided by the library (<code>androidx.compose.foundation</code>, <code>androidx.compose.material3</code>) — the same pattern you'll use to write your own.</li>
+<li>Since nothing here ever changes, <strong>there is no reason for this screen to ever recompose</strong>: this screen never recomposes after the initial composition, because it doesn't depend on any state.</li>
+</ul>
+<p>Run the project and confirm it just displays a fixed &quot;0&quot; centered on the screen.</p>
+<hr>
+<h2 id="4-state-and-recomposition-the-counter">4. State and recomposition: the counter</h2>
+<h3 id="41-the-imperative-way-increasingcounter">4.1 The imperative way: <code>IncreasingCounter</code></h3>
+<p>File: <code>IncreasingCounter/app/src/main/java/com/example/increasingcounter/MainActivity.kt</code></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">class</span> <span class="hljs-title class_">MainActivity</span> : <span class="hljs-type">AppCompatActivity</span>() {
+
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">var</span> count = <span class="hljs-number">0</span>
+
+    <span class="hljs-keyword">override</span> <span class="hljs-function"><span class="hljs-keyword">fun</span> <span class="hljs-title">onCreate</span><span class="hljs-params">(savedInstanceState: <span class="hljs-type">Bundle</span>?)</span></span> {
+        <span class="hljs-keyword">super</span>.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        <span class="hljs-keyword">val</span> counterText = findViewById&lt;TextView&gt;(R.id.counterText)
+        <span class="hljs-keyword">val</span> addButton = findViewById&lt;Button&gt;(R.id.addButton)
+
+        addButton.setOnClickListener {
+            count += <span class="hljs-number">1</span>
+            counterText.text = <span class="hljs-string">&quot;<span class="hljs-variable">$count</span>&quot;</span>
+        }
+    }
+}
+</div></code></pre>
+<p>Same app, same behavior as <code>JetPackIncreasingCounter</code> — but notice the <strong>mental model</strong> behind this code:</p>
+<ul>
+<li><code>count</code> is a plain field on the <code>Activity</code>. Nothing about it is &quot;observed&quot; by anything — it's just a number sitting in memory.</li>
+<li><code>counterText</code> is a <strong>reference to a live widget object</strong>, fetched once via <code>findViewById</code>. That object has its own internal state (its current text), independent of <code>count</code>.</li>
+<li>The programmer is personally responsible for keeping the two in sync: every time <code>count</code> changes, the code must <em>remember</em> to also call <code>counterText.text = &quot;$count&quot;</code>. If you commented out that line, <code>count</code> would silently keep incrementing while the screen kept showing &quot;0&quot; forever.</li>
+<li>There is no &quot;recomposition&quot; concept at all: there's just a click handler that runs exactly the imperative steps it's told to run, in order, on the object graph it was given references to.</li>
+</ul>
+<p><em>Question to consider:</em> what would happen if this screen also had a second <code>TextView</code> showing the count in words (<code>&quot;one&quot;</code>, <code>&quot;two&quot;</code>...)? How many places in the code would you need to touch?</p>
+<h3 id="42-the-declarative-way-jetpackincreasingcounter">4.2 The declarative way: <code>JetPackIncreasingCounter</code></h3>
+<p>File: <code>JetPackIncreasingCounter/app/src/main/java/com/example/jetpackincreasingcounter/MainActivity.kt</code></p>
+<pre class="hljs"><code><div><span class="hljs-meta">@Composable</span>
+<span class="hljs-function"><span class="hljs-keyword">fun</span> <span class="hljs-title">Counter</span><span class="hljs-params">()</span></span> {
+    <span class="hljs-keyword">var</span> count <span class="hljs-keyword">by</span> remember { mutableIntStateOf(<span class="hljs-number">0</span>) }
+
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(text = <span class="hljs-string">&quot;<span class="hljs-variable">$count</span>&quot;</span>, fontSize = <span class="hljs-number">72.</span>sp)
+        Button(onClick = { count += <span class="hljs-number">1</span> }) {
+            Text(text = <span class="hljs-string">&quot;Add+1&quot;</span>)
+        }
+    }
+}
+</div></code></pre>
+<h3 id="43-remember-and-mutableintstateof">4.3 <code>remember</code> and <code>mutableIntStateOf</code></h3>
+<ul>
+<li><code>mutableIntStateOf(0)</code> creates a state holder that Compose can observe: when its value changes, Compose knows it needs to recompose.</li>
+<li><code>remember { ... }</code> tells Compose: &quot;keep this value across recompositions, don't recreate it every time <code>Counter()</code> runs again.&quot; Without <code>remember</code>, every recomposition would reset <code>count</code> back to <code>0</code>.</li>
+<li><code>by</code> is Kotlin's property delegation: it lets you write <code>count</code> and <code>count = x</code> directly instead of <code>count.value</code>.</li>
+</ul>
+<p>This is exactly the cycle described in the article's Recomposition section: <em>user interaction → event (<code>onClick</code>) → state change → Compose calls the composable again → the UI redraws</em>.</p>
+<p><strong>Contrast with <code>IncreasingCounter</code> (imperative):</strong> in the Views version, the programmer manually writes the line that pushes the new value into the widget (<code>counterText.text = &quot;$count&quot;</code>). In the Compose version, that line doesn't exist anywhere — <code>Text(text = &quot;$count&quot;, ...)</code> simply <em>declares</em> that this text should always match <code>count</code>, and Compose is the one responsible for calling that code again whenever <code>count</code> changes. The mental shift is: <strong>stop thinking &quot;when X happens, go update widget Y&quot; and start thinking &quot;this piece of UI is a function of this piece of state — describe that function once.&quot;</strong></p>
+<h3 id="44-tracing-a-recomposition">4.4 Tracing a recomposition</h3>
+<p>With each tap on &quot;Add+1&quot;, the full cycle is:</p>
+<pre class="hljs"><code><div>Tap on the button
+   → the lambda onClick = { count += 1 } runs
+   → count changes from 0 to 1
+   → Compose marks Counter() (and anything reading &quot;count&quot;) as &quot;dirty&quot;
+   → Compose re-executes the composable Text(text = &quot;$count&quot;, ...)
+   → the screen shows &quot;1&quot;
+</div></code></pre>
+<p>Important: the <code>Button</code> itself <strong>doesn't need to recompose</strong> because it doesn't depend on <code>count</code>; only the <code>Text</code> that reads <code>count</code> recomposes. This is the first concrete evidence of &quot;smart / selective recomposition.&quot;</p>
+<h3 id="45-why-doesnt-the-whole-function-reset">4.5 Why doesn't the whole function &quot;reset&quot;?</h3>
+<p>If <code>Counter()</code> runs again, why doesn't <code>count</code> go back to <code>0</code>? Think about the role of <code>remember</code> here before moving on — then try deleting <code>remember</code> in the editor, predict what will happen, and test it.</p>
+<p><strong>Hands-on exercise:</strong> modify <code>Counter()</code> to add a second &quot;Reset&quot; button that sets <code>count</code> back to <code>0</code>. Before running it, predict which composable recomposes and which doesn't.</p>
+<hr>
+<h2 id="5-two-independent-pieces-of-state-changing-a-name">5. Two independent pieces of state: changing a name</h2>
+<h3 id="51-the-imperative-way-changename">5.1 The imperative way: <code>ChangeName</code></h3>
+<p>File: <code>ChangeName/app/src/main/java/com/example/changename/MainActivity.kt</code></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">class</span> <span class="hljs-title class_">MainActivity</span> : <span class="hljs-type">AppCompatActivity</span>() {
+
+    <span class="hljs-keyword">override</span> <span class="hljs-function"><span class="hljs-keyword">fun</span> <span class="hljs-title">onCreate</span><span class="hljs-params">(savedInstanceState: <span class="hljs-type">Bundle</span>?)</span></span> {
+        <span class="hljs-keyword">super</span>.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        <span class="hljs-keyword">val</span> initialName = <span class="hljs-string">&quot;World&quot;</span>
+
+        <span class="hljs-keyword">val</span> greetingText = findViewById&lt;TextView&gt;(R.id.greetingText)
+        <span class="hljs-keyword">val</span> nameField = findViewById&lt;EditText&gt;(R.id.nameField)
+        <span class="hljs-keyword">val</span> changeButton = findViewById&lt;Button&gt;(R.id.changeButton)
+
+        greetingText.text = <span class="hljs-string">&quot;Hello, <span class="hljs-variable">$initialName</span>&quot;</span>
+        nameField.setText(initialName)
+
+        changeButton.setOnClickListener {
+            greetingText.text = <span class="hljs-string">&quot;Hello, <span class="hljs-subst">${nameField.text}</span>&quot;</span>
+        }
+    }
+}
+</div></code></pre>
+<p>Same behavior as <code>JetPackChangeName</code>, but look closely at where the &quot;state&quot; actually lives:</p>
+<ul>
+<li>There is no <code>count</code>-like variable holding the current name — the <strong><code>EditText</code> widget itself</strong> is the state. Its current text lives inside the live <code>nameField</code> object, and the only way to read it is <code>nameField.text</code>.</li>
+<li>The greeting is not &quot;kept in sync&quot; with anything: it's set once in <code>onCreate</code>, and then only touched again, once, inside the <code>onClick</code> listener. If any <em>other</em> event could change the name (a second button, a voice-input callback, a saved preference loading late), the programmer would have to remember to duplicate that same <code>greetingText.text = &quot;Hello, ${nameField.text}&quot;</code> line inside every one of those places too.</li>
+<li>Notice there's no equivalent of <code>remember</code> or <code>mutableStateOf</code> at all — because there's no abstraction here that says &quot;this text depends on that value.&quot; The dependency between the <code>EditText</code>'s content and the greeting only exists in the programmer's head, encoded as an imperative instruction inside one click handler.</li>
+</ul>
+<p><em>Question to consider:</em> if you wanted to add a live character counter below the field (updating on every keystroke, not just on &quot;Change&quot;), what would you need to add here?</p>
+<h3 id="52-the-declarative-way-jetpackchangename">5.2 The declarative way: <code>JetPackChangeName</code></h3>
+<p>File: <code>JetPackChangeName/app/src/main/java/com/example/jetpackchangename/MainActivity.kt</code></p>
+<pre class="hljs"><code><div><span class="hljs-meta">@Composable</span>
+<span class="hljs-function"><span class="hljs-keyword">fun</span> <span class="hljs-title">ChangeName</span><span class="hljs-params">()</span></span> {
+    <span class="hljs-keyword">val</span> initialName = <span class="hljs-string">&quot;World&quot;</span>
+    <span class="hljs-keyword">var</span> greetingName <span class="hljs-keyword">by</span> remember { mutableStateOf(initialName) }
+    <span class="hljs-keyword">var</span> fieldValue <span class="hljs-keyword">by</span> remember { mutableStateOf(initialName) }
+
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Column(
+            modifier = Modifier.padding(<span class="hljs-number">16.</span>dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(text = <span class="hljs-string">&quot;Hello, <span class="hljs-variable">$greetingName</span>&quot;</span>, fontSize = <span class="hljs-number">24.</span>sp)
+            OutlinedTextField(
+                value = fieldValue,
+                onValueChange = { fieldValue = it },
+                modifier = Modifier.padding(top = <span class="hljs-number">16.</span>dp)
+            )
+            Button(
+                onClick = { greetingName = fieldValue },
+                modifier = Modifier.padding(top = <span class="hljs-number">16.</span>dp)
+            ) {
+                Text(<span class="hljs-string">&quot;Change&quot;</span>)
+            }
+        }
+    }
+}
+</div></code></pre>
+<h3 id="53-two-independent-state-variables">5.3 Two independent state variables</h3>
+<p>Notice there are <strong>two</strong> separate <code>remember { mutableStateOf(...) }</code> calls:</p>
+<ul>
+<li><code>fieldValue</code>: what the user is currently typing in the <code>OutlinedTextField</code> — changes with <strong>every keystroke</strong>.</li>
+<li><code>greetingName</code>: what's shown in the greeting — only changes when the &quot;Change&quot; button is tapped.</li>
+</ul>
+<p>This is a perfect demonstration of the article's point: <em>&quot;recomposition skips as much as possible.&quot;</em></p>
+<p><strong>Live trace, keystroke by keystroke:</strong></p>
+<pre class="hljs"><code><div>The user types &quot;J&quot;
+   → onValueChange fires with &quot;J&quot;
+   → fieldValue = &quot;J&quot;
+   → Compose recomposes the OutlinedTextField (it reads fieldValue)
+   → the Text(&quot;Hello, $greetingName&quot;) does NOT recompose (it doesn't read fieldValue)
+</div></code></pre>
+<pre class="hljs"><code><div>The user taps &quot;Change&quot;
+   → onClick fires
+   → greetingName = fieldValue (say, &quot;John&quot;)
+   → Compose recomposes Text(&quot;Hello, $greetingName&quot;)
+   → the OutlinedTextField does NOT need to recompose (it doesn't read greetingName)
+</div></code></pre>
+<p><strong>Contrast with <code>ChangeName</code> (imperative):</strong> in the Views version there was exactly one line that updated the UI (<code>greetingText.text = &quot;Hello, ${nameField.text}&quot;</code>), written once inside the click listener, and the programmer had to consciously decide <em>when</em> to run it. In the Compose version there are <strong>two separate declarations</strong> — <code>Text(text = &quot;Hello, $greetingName&quot;)</code> and <code>OutlinedTextField(value = fieldValue, ...)</code> — and neither one is an instruction to &quot;update now.&quot; Each is a standing description of what that piece of UI should show, given the state it reads. Compose decides <em>when</em> to re-run each one by watching which state changed — the programmer never writes an update statement at all. This is the core shift shown in section 1: instead of &quot;event → programmer writes code to push the new value into a widget,&quot; it's &quot;event → state changes → Compose figures out which descriptions need to run again.&quot;</p>
+<h3 id="54-the-central-idea">5.4 The central idea</h3>
+<p>In Compose, the unit of recomposition is not &quot;the whole function&quot; but <strong>each composition scope that actually reads a given piece of state</strong>. Each <code>Text</code>, each child composable, recomposes independently based on what state it reads — not because it happens to live in the same function as something that changed.</p>
+<p><strong>Activity:</strong> before running the app, try to answer:</p>
+<ol>
+<li>If you add a <code>Text(&quot;Length: ${fieldValue.length}&quot;)</code> right below the <code>TextField</code>, how often does it recompose?</li>
+<li>If you replace <code>greetingName</code> with an <code>Int</code> that counts how many times &quot;Change&quot; was tapped, and show it in another <code>Text</code>, does that new <code>Text</code> recompose while you're typing in the field?</li>
+</ol>
+<p>Then implement it and check your answers against the real behavior.</p>
+<hr>
+<h2 id="6-golden-rules-of-recomposition">6. Golden rules of recomposition</h2>
+<h3 id="61-never-rely-on-side-effects">6.1 Never rely on side effects</h3>
+<pre class="hljs"><code><div><span class="hljs-comment">// ❌ Bad: reading SharedPreferences inside the composable</span>
+<span class="hljs-meta">@Composable</span>
+<span class="hljs-function"><span class="hljs-keyword">fun</span> <span class="hljs-title">SharedPrefsToggleBad</span><span class="hljs-params">()</span></span> {
+    <span class="hljs-keyword">val</span> value = sharedPrefs.getBoolean(<span class="hljs-string">&quot;key&quot;</span>, <span class="hljs-literal">false</span>) <span class="hljs-comment">// expensive, and may run many times</span>
+    ...
+}
+
+<span class="hljs-comment">// ✅ Good: the value arrives as a parameter, the read happens in the ViewModel</span>
+<span class="hljs-meta">@Composable</span>
+<span class="hljs-function"><span class="hljs-keyword">fun</span> <span class="hljs-title">SharedPrefsToggle</span><span class="hljs-params">(
+    text: <span class="hljs-type">String</span>,
+    value: <span class="hljs-type">Boolean</span>,
+    onValueChanged: (<span class="hljs-type">Boolean</span>) -&gt; <span class="hljs-type">Unit</span>
+)</span></span> {
+    Row {
+        Text(text)
+        Checkbox(checked = value, onCheckedChange = onValueChanged)
+    }
+}
+</div></code></pre>
+<p>Relate this back to <code>ChangeName</code>: the composable doesn't read from or write to anything external (a file, the network, a database); all state lives in <code>remember</code> and is updated through callbacks (<code>onValueChange</code>, <code>onClick</code>). That's exactly the correct pattern.</p>
+<h3 id="62-recomposition-is-optimistic-and-can-be-canceled">6.2 Recomposition is optimistic and can be canceled</h3>
+<ul>
+<li>Compose starts recomposing expecting to finish before parameters change again.</li>
+<li>If a parameter changes while recomposition is in progress, Compose <strong>cancels and restarts</strong> with the new value.</li>
+<li>If there were a side effect in the middle, it could end up &quot;applied&quot; even though the composition was discarded → inconsistent state.</li>
+<li><strong>Conclusion:</strong> idempotence and freedom from side effects are what make canceling/restarting safe.</li>
+<li><strong>Important distinction:</strong> discarding a canceled composition only throws away the <em>UI tree</em> that call would have produced — it does <strong>not</strong> undo anything that already happened outside that call, such as a database write, a mutation to a shared/global object, or a real callback with external consequences. A local variable declared and only read inside that same function call is the <em>one</em> case where cancellation is harmless, precisely because nothing about it escapes the call.</li>
+</ul>
+<h3 id="63-composable-functions-run-often--avoid-expensive-work">6.3 Composable functions run often — avoid expensive work</h3>
+<ul>
+<li>They may run on every frame of a UI animation.</li>
+<li>Forbidden example: reading from disk or network directly inside the composable.</li>
+<li>Correct pattern: the expensive read happens in a coroutine in the <code>ViewModel</code>, and the result arrives as a parameter/state.</li>
+</ul>
+<h3 id="64-never-write-to-local-variables-during-composition">6.4 Never write to local variables during composition</h3>
+<p>Revisit the snippet from section 2.3:</p>
+<pre class="hljs"><code><div><span class="hljs-comment">// From the article — looks suspicious, but let&#x27;s check it carefully</span>
+<span class="hljs-meta">@Composable</span>
+<span class="hljs-function"><span class="hljs-keyword">fun</span> <span class="hljs-title">ListWithBug</span><span class="hljs-params">(myList: <span class="hljs-type">List</span>&lt;<span class="hljs-type">String</span>&gt;)</span></span> {
+    <span class="hljs-keyword">var</span> items = <span class="hljs-number">0</span>
+    Row {
+        Column {
+            <span class="hljs-keyword">for</span> (item <span class="hljs-keyword">in</span> myList) {
+                Card {
+                    Text(<span class="hljs-string">&quot;Item: <span class="hljs-variable">$item</span>&quot;</span>)
+                    items++ <span class="hljs-comment">// side effect of recomposition</span>
+                }
+            }
+        }
+        Text(<span class="hljs-string">&quot;Count: <span class="hljs-variable">$items</span>&quot;</span>)
+    }
+}
+</div></code></pre>
+<p><strong>Important clarification before condemning this code:</strong> trace through a single call to <code>ListWithBug</code>. <code>items</code> is declared fresh inside the function body, so every time Compose calls <code>ListWithBug</code> again, <code>items</code> restarts at <code>0</code>, the loop runs to completion, and <code>items</code> ends up equal to <code>myList.size</code> before <code>Text(&quot;Count: $items&quot;)</code> reads it. If that composition is committed, the count shown is correct. If it's canceled instead, Compose simply doesn't emit anything from that discarded pass — it doesn't leave a stale wrong number on screen. <strong>So this exact snippet does not actually produce a visible bug.</strong></p>
+<p>The real problem is a matter of <em>habit and principle</em>, not a bug you can point to on screen here:</p>
+<ul>
+<li>The only reason this is safe is that <code>items</code> is freshly re-declared on every single call. Nothing here is &quot;remembered&quot; across recompositions or shared between composables.</li>
+<li>The moment that stops being true — the variable gets hoisted out of the function body, promoted to <code>remember</code>, or captured by something that outlives one call — the exact same pattern (<code>items++</code> inside a loop, read afterwards) turns into a real, visible bug.</li>
+</ul>
+<p><strong>Here is a version where the bug actually appears:</strong></p>
+<pre class="hljs"><code><div><span class="hljs-comment">// ❌ Really broken: the counter survives across recompositions</span>
+<span class="hljs-meta">@Composable</span>
+<span class="hljs-function"><span class="hljs-keyword">fun</span> <span class="hljs-title">ListWithRealBug</span><span class="hljs-params">(myList: <span class="hljs-type">List</span>&lt;<span class="hljs-type">String</span>&gt;)</span></span> {
+    <span class="hljs-keyword">var</span> items <span class="hljs-keyword">by</span> remember { mutableIntStateOf(<span class="hljs-number">0</span>) }
+    Column {
+        <span class="hljs-keyword">for</span> (item <span class="hljs-keyword">in</span> myList) {
+            Text(<span class="hljs-string">&quot;Item: <span class="hljs-variable">$item</span>&quot;</span>)
+            items++ <span class="hljs-comment">// adds to the PREVIOUS total instead of recomputing it</span>
+        }
+    }
+    Text(<span class="hljs-string">&quot;Count: <span class="hljs-variable">$items</span>&quot;</span>)
+}
+
+<span class="hljs-comment">// ✅ Good: no mutable counter at all, just derive the value every time</span>
+<span class="hljs-meta">@Composable</span>
+<span class="hljs-function"><span class="hljs-keyword">fun</span> <span class="hljs-title">ListComposable</span><span class="hljs-params">(myList: <span class="hljs-type">List</span>&lt;<span class="hljs-type">String</span>&gt;)</span></span> {
+    Column {
+        <span class="hljs-keyword">for</span> (item <span class="hljs-keyword">in</span> myList) {
+            Text(<span class="hljs-string">&quot;Item: <span class="hljs-variable">$item</span>&quot;</span>)
+        }
+        Text(<span class="hljs-string">&quot;Count: <span class="hljs-subst">${myList.size}</span>&quot;</span>)
+    }
+}
+</div></code></pre>
+<p>Now <code>items</code> <strong>is</strong> kept alive across recompositions by <code>remember</code>. Every time <code>ListWithRealBug</code> recomposes — for any reason, not necessarily because <code>myList</code> changed — the loop runs again and adds <code>myList.size</code> <em>on top of</em> whatever <code>items</code> already was. After a few recompositions with a 3-item list, the displayed count is 6, then 9, then 12... growing without bound, never showing the actual size of the list.</p>
+<p>This is also the version where the parallelism warning becomes real: if two recompositions of this composable could ever run concurrently, both would read-then-write the same remembered <code>items</code>, racing on it. A plain local <code>var</code> reinitialized every call (like in <code>ListWithBug</code>) has nothing to race on — there's no shared state to race over.</p>
+<p><strong>Takeaway:</strong> the rule &quot;don't mutate variables inside a composable&quot; is really about not letting any piece of mutable state <em>persist or escape</em> across calls without an explicit mechanism (<code>remember</code>, hoisted state, a <code>ViewModel</code>) that Compose knows how to manage. A local variable that's declared and consumed within a single call is harmless on its own — but writing that habit into your fingers is what leads directly to bugs like <code>ListWithRealBug</code> the first time that variable gets promoted to survive across recompositions.</p>
+<h3 id="65-execution-order-isnt-guaranteed">6.5 Execution order isn't guaranteed</h3>
+<pre class="hljs"><code><div><span class="hljs-meta">@Composable</span>
+<span class="hljs-function"><span class="hljs-keyword">fun</span> <span class="hljs-title">ButtonRow</span><span class="hljs-params">()</span></span> {
+    MyFancyNavigation {
+        StartScreen()
+        MiddleScreen()
+        EndScreen()
+    }
+}
+</div></code></pre>
+<ul>
+<li><code>StartScreen()</code>, <code>MiddleScreen()</code>, and <code>EndScreen()</code> may run in any order.</li>
+<li>You can't assume <code>StartScreen()</code> runs first and leaves something ready (a global variable, say) for <code>MiddleScreen()</code> to use.</li>
+<li>Every composable must be self-contained. (This applies to a possible future where Compose can run composables in parallel — even though it currently doesn't, code should be written as if it could.)</li>
+</ul>
+<hr>
+<h2 id="7-summary">7. Summary</h2>
+<p>Compose isn't &quot;magic&quot; — it's a compiler and a runtime that decide, based on what state each composable reads, which parts of the UI tree need to run again. If a composable is fast, idempotent, and side-effect free, that process is safe no matter how many times, in what order, or when Compose decides to run it.</p>
+<p><strong>Review questions:</strong></p>
+<ol>
+<li>What does <code>@Composable</code> do?</li>
+<li>What is recomposition, and what triggers it?</li>
+<li>Why is <code>remember</code> necessary in <code>Counter()</code>?</li>
+<li>Why doesn't typing in the <code>TextField</code> in <code>ChangeName</code> recompose the greeting <code>Text</code>?</li>
+<li>Name one of the three golden rules of a composable.</li>
+</ol>
+<p><strong>Exercise:</strong> on the <code>JetPackChangeName</code> project, add:</p>
+<ul>
+<li>A character counter that updates live while typing (without pressing &quot;Change&quot;).</li>
+<li>A &quot;Reset&quot; button that sets both states (<code>fieldValue</code> and <code>greetingName</code>) back to the initial value <code>&quot;World&quot;</code>.</li>
+</ul>
+<p>Write, as a comment in the code, which composable(s) recompose on each interaction (keystroke, &quot;Change&quot;, &quot;Reset&quot;).</p>
+<hr>
+<h2 id="8-kotlin-data-types-and-building-a-jsonarray-of-people">8. Kotlin data types, and building a <code>JSONArray</code> of people</h2>
+<p>Before introducing <code>LazyColumn</code> (section 9), we need an actual list to display. This section covers just enough Kotlin data types to define one record, and then how to represent a collection of those records as a <code>JSONArray</code>/<code>JSONObject</code> — the classic shape data arrives in from a web API, and a natural stand-in for &quot;real&quot; list data in a classroom demo.</p>
+<h3 id="81-basic-kotlin-data-types">8.1 Basic Kotlin data types</h3>
+<p>Kotlin's built-in types you'll use immediately:</p>
+<table>
+<thead>
+<tr>
+<th>Kotlin type</th>
+<th>Holds</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Int</code></td>
+<td>whole number</td>
+<td><code>val age: Int = 20</code></td>
+</tr>
+<tr>
+<td><code>Double</code></td>
+<td>decimal number</td>
+<td><code>val price: Double = 9.99</code></td>
+</tr>
+<tr>
+<td><code>String</code></td>
+<td>text</td>
+<td><code>val name: String = &quot;Ada&quot;</code></td>
+</tr>
+<tr>
+<td><code>Boolean</code></td>
+<td>true/false</td>
+<td><code>val isActive: Boolean = true</code></td>
+</tr>
+<tr>
+<td><code>List&lt;T&gt;</code></td>
+<td>ordered collection of <code>T</code></td>
+<td><code>val names: List&lt;String&gt; = listOf(&quot;Ada&quot;, &quot;Bob&quot;)</code></td>
+</tr>
+</tbody>
+</table>
+<p>Kotlin infers types, so <code>val age = 20</code> is the same as <code>val age: Int = 20</code> — the type annotation is optional but worth writing explicitly the first few times, for clarity.</p>
+<h3 id="82-data-class-modeling-one-record">8.2 <code>data class</code>: modeling one record</h3>
+<p>A <code>data class</code> is Kotlin's dedicated way to define a plain record type — a bundle of named, typed fields with no manual boilerplate. For this list, one record is one person:</p>
+<pre class="hljs"><code><div><span class="hljs-keyword">data</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Person</span>(
+    <span class="hljs-keyword">val</span> id: <span class="hljs-built_in">Int</span>,
+    <span class="hljs-keyword">val</span> name: String,
+    <span class="hljs-keyword">val</span> age: <span class="hljs-built_in">Int</span>
+)
+</div></code></pre>
+<p>Declaring <code>data class</code> (instead of plain <code>class</code>) gives you, for free:</p>
+<ul>
+<li>A constructor: <code>Person(id = 1, name = &quot;Ada&quot;, age = 30)</code></li>
+<li>Readable <code>toString()</code>, <code>equals()</code>, <code>hashCode()</code> — useful when debugging or comparing items.</li>
+<li><code>copy()</code> — e.g. <code>ada.copy(age = 31)</code> returns a new <code>Person</code> with just <code>age</code> changed.</li>
+</ul>
+<p>This is the type each row of our <code>LazyColumn</code> will eventually render. Note the parallel with earlier state examples: <code>count</code> was a bare <code>Int</code>; here, each list item is a small structured value instead — but it is still just <em>data</em> that composables will read and display.</p>
+<h3 id="83-from-a-listperson-to-a-jsonarray">8.3 From a <code>List&lt;Person&gt;</code> to a <code>JSONArray</code></h3>
+<p>Kotlin/Android already ships the classic <code>org.json</code> classes (<code>JSONObject</code>, <code>JSONArray</code>) — no extra library needed for a simple demo. The idea: each <code>Person</code> becomes one <code>JSONObject</code>; the whole collection becomes one <code>JSONArray</code>.</p>
+<pre class="hljs"><code><div><span class="hljs-keyword">import</span> org.json.JSONArray
+<span class="hljs-keyword">import</span> org.json.JSONObject
+
+<span class="hljs-function"><span class="hljs-keyword">fun</span> <span class="hljs-title">personToJson</span><span class="hljs-params">(person: <span class="hljs-type">Person</span>)</span></span>: JSONObject {
+    <span class="hljs-keyword">val</span> obj = JSONObject()
+    obj.put(<span class="hljs-string">&quot;id&quot;</span>, person.id)
+    obj.put(<span class="hljs-string">&quot;name&quot;</span>, person.name)
+    obj.put(<span class="hljs-string">&quot;age&quot;</span>, person.age)
+    <span class="hljs-keyword">return</span> obj
+}
+
+<span class="hljs-function"><span class="hljs-keyword">fun</span> <span class="hljs-title">peopleToJsonArray</span><span class="hljs-params">(people: <span class="hljs-type">List</span>&lt;<span class="hljs-type">Person</span>&gt;)</span></span>: JSONArray {
+    <span class="hljs-keyword">val</span> array = JSONArray()
+    <span class="hljs-keyword">for</span> (person <span class="hljs-keyword">in</span> people) {
+        array.put(personToJson(person))
+    }
+    <span class="hljs-keyword">return</span> array
+}
+</div></code></pre>
+<p>Sample data to build the array from:</p>
+<pre class="hljs"><code><div><span class="hljs-keyword">val</span> people = listOf(
+    Person(id = <span class="hljs-number">1</span>, name = <span class="hljs-string">&quot;Ada&quot;</span>,  age = <span class="hljs-number">36</span>),
+    Person(id = <span class="hljs-number">2</span>, name = <span class="hljs-string">&quot;Bob&quot;</span>,  age = <span class="hljs-number">24</span>),
+    Person(id = <span class="hljs-number">3</span>, name = <span class="hljs-string">&quot;Cleo&quot;</span>, age = <span class="hljs-number">41</span>),
+    Person(id = <span class="hljs-number">4</span>, name = <span class="hljs-string">&quot;Dan&quot;</span>,  age = <span class="hljs-number">19</span>)
+)
+
+<span class="hljs-keyword">val</span> peopleJson: JSONArray = peopleToJsonArray(people)
+println(peopleJson.toString(<span class="hljs-number">2</span>)) <span class="hljs-comment">// pretty-printed, indent = 2</span>
+</div></code></pre>
+<p>Resulting JSON (conceptually — this is what <code>toString(2)</code> prints):</p>
+<pre class="hljs"><code><div><span class="hljs-punctuation">[</span>
+  <span class="hljs-punctuation">{</span> <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Ada&quot;</span><span class="hljs-punctuation">,</span>  <span class="hljs-attr">&quot;age&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">36</span> <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-punctuation">{</span> <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">2</span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Bob&quot;</span><span class="hljs-punctuation">,</span>  <span class="hljs-attr">&quot;age&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">24</span> <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-punctuation">{</span> <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">3</span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Cleo&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;age&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">41</span> <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-punctuation">{</span> <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">4</span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Dan&quot;</span><span class="hljs-punctuation">,</span>  <span class="hljs-attr">&quot;age&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">19</span> <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">]</span>
+</div></code></pre>
+<h3 id="84-going-back-jsonarray-to-listperson">8.4 Going back: <code>JSONArray</code> to <code>List&lt;Person&gt;</code></h3>
+<p>Worth showing the reverse direction too, since this is exactly what happens when real data arrives from a network call:</p>
+<pre class="hljs"><code><div><span class="hljs-function"><span class="hljs-keyword">fun</span> <span class="hljs-title">jsonToPerson</span><span class="hljs-params">(obj: <span class="hljs-type">JSONObject</span>)</span></span>: Person {
+    <span class="hljs-keyword">return</span> Person(
+        id = obj.getInt(<span class="hljs-string">&quot;id&quot;</span>),
+        name = obj.getString(<span class="hljs-string">&quot;name&quot;</span>),
+        age = obj.getInt(<span class="hljs-string">&quot;age&quot;</span>)
+    )
+}
+
+<span class="hljs-function"><span class="hljs-keyword">fun</span> <span class="hljs-title">jsonArrayToPeople</span><span class="hljs-params">(array: <span class="hljs-type">JSONArray</span>)</span></span>: List&lt;Person&gt; {
+    <span class="hljs-keyword">val</span> result = mutableListOf&lt;Person&gt;()
+    <span class="hljs-keyword">for</span> (i <span class="hljs-keyword">in</span> <span class="hljs-number">0</span> until array.length()) {
+        result.add(jsonToPerson(array.getJSONObject(i)))
+    }
+    <span class="hljs-keyword">return</span> result
+}
+</div></code></pre>
+<h3 id="key-points">Key points</h3>
+<ol>
+<li><strong><code>data class</code> = a typed shape for one row.</strong> Before this, &quot;state&quot; in our examples was a single primitive (<code>Int</code>, <code>String</code>). A <code>LazyColumn</code> needs a <em>list of structured records</em> — <code>data class</code> is the minimal, idiomatic way to define that shape in Kotlin.</li>
+<li><strong><code>JSONArray</code>/<code>JSONObject</code> are just a serialization format.</strong> They are not a special Kotlin/Compose concept — they're the generic, stringly-typed way to represent &quot;a list of records&quot; that any web API would return. Converting <code>List&lt;Person&gt;</code> → <code>JSONArray</code> and back is the same round-trip a real app does when it talks to a server.</li>
+<li><strong>This is where the list for section 9 comes from.</strong> We now have <code>people: List&lt;Person&gt;</code> (or, equivalently, a <code>JSONArray</code> we can parse into one) — this is exactly the list the upcoming <code>LazyColumn</code> will render, one row per <code>Person</code>.</li>
+</ol>
+<p><strong>Try it:</strong> run <code>JetPackListPeople</code> and check Logcat (<code>adb logcat -s JetPackListPeople:D</code>). You should see <code>peopleJson.toString(2)</code> printed as pretty-printed JSON, followed by the reconstructed list from <code>jsonArrayToPeople(peopleJson)</code>, and confirmation that the round trip reconstructs the original <code>List&lt;Person&gt;</code>.</p>
+<hr>
+<h2 id="9-introducing-lazy--lazycolumn">9. Introducing <code>Lazy</code> / <code>LazyColumn</code></h2>
+<h3 id="motivating-problem">Motivating problem</h3>
+<p>Suppose we want to show a list of, say, 5,000 people (the <code>List&lt;Person&gt;</code> from section 8, just bigger). With a plain <code>Column</code>, <strong>every single row composable is created and measured immediately</strong>, even the ones far off-screen. That's wasteful in memory and CPU, and for a long enough list it will visibly lag or crash.</p>
+<pre class="hljs"><code><div><span class="hljs-comment">// Don&#x27;t do this for long lists:</span>
+Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+    people.forEach { person -&gt; PersonRow(person) }
+}
+
+<span class="hljs-meta">@Composable</span>
+<span class="hljs-function"><span class="hljs-keyword">fun</span> <span class="hljs-title">PersonRow</span><span class="hljs-params">(person: <span class="hljs-type">Person</span>)</span></span> {
+    Text(text = <span class="hljs-string">&quot;<span class="hljs-subst">${person.name}</span> (<span class="hljs-subst">${person.age}</span>)&quot;</span>)
+}
+</div></code></pre>
+<h3 id="the-fix-lazycolumn">The fix: <code>LazyColumn</code></h3>
+<pre class="hljs"><code><div>LazyColumn {
+    items(people) { person -&gt;
+        PersonRow(person)
+    }
+}
+</div></code></pre>
+<p><code>LazyColumn</code> (and its cousin <code>LazyRow</code>) only composes and lays out the items that are <strong>actually visible on screen, plus a small buffer just outside the viewport</strong>. As the user scrolls, items that scroll off are disposed and new items that scroll into view are composed on demand.</p>
+<h3 id="the-key-concept-for-this-section-smart-recomposition-inside-lazycolumn">The key concept for this section: &quot;smart&quot; recomposition inside <code>LazyColumn</code></h3>
+<p>This is the deeper idea beyond just &quot;it's more efficient because it doesn't render off-screen items.&quot; The important point is what happens on <em>recomposition</em>, not just initial composition:</p>
+<ul>
+<li>Each <code>item { }</code> (or each row generated by <code>items(list) { }</code>) is its <strong>own composable scope</strong>. If the state backing <em>one</em> row changes, Compose recomposes <strong>only that row's composable</strong>, not the whole list, and not even the neighboring rows.</li>
+<li>This mirrors exactly what we saw in sections 4 and 5 (state and recomposition with the counter and <code>ChangeName</code>) — Compose recomposition is always scoped to &quot;which composable actually reads the state that changed.&quot; <code>LazyColumn</code> doesn't introduce a new rule; it's the <em>same</em> rule, now applied across potentially thousands of rows.</li>
+<li>Practical consequence: if each row has its own <code>remember { mutableStateOf(...) }</code> (e.g., a &quot;favorite&quot; checkbox per person, or a per-row counter), tapping row #3742's checkbox recomposes <em>only</em> row #3742. Compose does not walk back through the other 4,999 rows.</li>
+<li>Contrast this with what would happen if the whole list were driven by one big <code>mutableStateOf(List&lt;Person&gt;)</code> at the top and the list itself, rather than individual rows, needed to change: then any per-item mutation typically means replacing the whole list (since <code>List</code> is immutable), and now the <em>comparison</em> of old vs. new list matters. This is where <code>key = { person.id }</code> in <code>items(...)</code> becomes important: it tells Compose &quot;this row corresponds to the same conceptual <code>Person</code> across recompositions, even if its position in the list changed&quot; — enabling Compose to skip recomposing/reordering rows that didn't actually change, and to preserve each row's own internal <code>remember</code>ed state correctly when the list is reordered/filtered. This is exactly why <code>Person</code> has an <code>id: Int</code> field from section 8 — it's the stable identity <code>key</code> relies on. (This connects directly to appendix A7 below, which covers <code>key</code> in more depth.)</li>
+</ul>
+<pre class="hljs"><code><div>LazyColumn {
+    items(items = people, key = { person -&gt; person.id }) { person -&gt;
+        PersonRow(person)
+    }
+}
+</div></code></pre>
+<h3 id="hands-on-exercise">Hands-on exercise</h3>
+<ol>
+<li>In <code>JetPackListPeople</code>, replace the hardcoded 4-person list with a larger generated <code>List&lt;Person&gt;</code> (e.g. <code>(1..2000).map { Person(id = it, name = &quot;Person $it&quot;, age = 18 + it % 50) }</code>).</li>
+<li>Add a <code>Log.d</code> (or a visible per-row counter with its own <code>remember</code>) inside the row composable.</li>
+<li>Scroll down and back up — check the logs to confirm rows get disposed/recomposed as they leave/enter the viewport, unlike a plain <code>Column</code> where everything exists at once.</li>
+<li>Give each row a per-row <code>Button</code> that increments a per-row <code>remember</code>ed counter. Click one row's button, then scroll away and back — the counter should be preserved (since <code>key</code> is stable). Then try removing <code>key</code> and see what goes wrong when the list is reordered.</li>
+</ol>
+<h3 id="wrap-up">Wrap-up</h3>
+<blockquote>
+<p>Composition builds the UI tree. Recomposition keeps only the parts that read <em>changed</em> state in sync — automatically, and always scoped to the smallest composable that actually reads that state. <code>LazyColumn</code> doesn't change this rule; it just applies it at scale, while <em>also</em> skipping composition entirely for rows that aren't even on screen yet.</p>
+</blockquote>
+<hr>
+<h2 id="additional-material">Additional material</h2>
+<p>Two pieces of vocabulary used throughout sections 4 and 5 — &quot;Compose can <strong>observe</strong> state changes&quot; and &quot;<code>by</code> is Kotlin's property <strong>delegation</strong>&quot; — are not Compose-specific jargon. They name two well-known, general-purpose software design patterns that Compose happens to build on.</p>
+<h3 id="a1-the-observer-pattern">A1. The Observer pattern</h3>
+<p><strong>The general pattern:</strong> an object (the <strong>subject</strong>) maintains a list of dependents (<strong>observers</strong>) and automatically notifies them whenever its own state changes, without the subject needing to know what those observers are going to do with that information. Classic examples: a spreadsheet cell notifying every formula that references it when its value changes; a GUI button's &quot;click&quot; event notifying every listener registered on it; RxJava/Kotlin <code>Flow</code> emitting values to collectors.</p>
+<p><strong>How this maps to Compose:</strong> <code>mutableStateOf(0)</code> returns a <code>MutableState&lt;Int&gt;</code> object. That object is the <em>subject</em>. It doesn't hold a literal list of registered listener objects the way a textbook Observer implementation might — instead, Compose's runtime uses a mechanism called a <strong>snapshot system</strong>:</p>
+<ul>
+<li>While a composable function is running, Compose keeps track of every piece of observable state it <em>reads</em> (every <code>.value</code> access, or every <code>count</code> access when using <code>by</code>). This builds an implicit &quot;this composable depends on this state&quot; relationship — this is the &quot;subscribing&quot; step, done automatically instead of by an explicit <code>addObserver()</code> call.</li>
+<li>When that state's value is later <em>written</em>, Compose's snapshot system notifies its recomposition scheduler that every composable which previously read that state is now invalid (&quot;dirty&quot;) and needs to run again. This is the &quot;notify observers&quot; step.</li>
+</ul>
+<p><strong>Analogy:</strong> how does a spreadsheet know to recalculate <code>=A1+A2</code> when you change <code>A1</code>? Nobody manually tells every formula in the sheet to recheck itself — the spreadsheet engine tracks which cells each formula reads, and automatically re-evaluates the formula when one of those cells changes. That is the Observer pattern, and it is functionally the same idea as Compose recomposing <code>Text(text = &quot;$count&quot;)</code> when <code>count</code> changes.</p>
+<p><strong>Where the analogy should not be pushed too far:</strong> in the classic Observer pattern (as in the GoF book, or Java's old <code>Observable</code>/<code>Observer</code> classes), the subject exposes explicit <code>subscribe</code>/<code>addObserver</code> and <code>notifyObservers</code> methods that application code calls directly. Compose's snapshot system does the equivalent bookkeeping <em>implicitly</em>, by instrumenting reads and writes of <code>.value</code> during composition — there's no explicit subscribe call anywhere in <code>Counter()</code> or <code>ChangeName()</code>. It's the same pattern at the conceptual level (subject/observer relationship, automatic notification on change) but a different, more automatic implementation strategy than the pattern's textbook form.</p>
+<h3 id="a2-the-delegation-pattern-and-kotlins-by">A2. The Delegation pattern and Kotlin's <code>by</code></h3>
+<p><strong>The general pattern:</strong> instead of a class implementing a piece of behavior itself, it holds a reference to another object and forwards (&quot;delegates&quot;) the call to that object. The class <em>appears</em> to have the behavior from the outside, but doesn't implement it — it hands the work off. Classic example: a <code>Car</code> class that delegates <code>startEngine()</code> to an <code>Engine</code> object it holds a reference to, rather than implementing engine-starting logic inline.</p>
+<p><strong>How this maps to Kotlin specifically — property delegation:</strong> Kotlin has a language feature, formalized with the <code>by</code> keyword, specifically for <em>delegating a property's getter and setter</em> to another object, instead of delegating a whole method. Any object used with <code>by</code> for a property must provide <code>getValue()</code> and (for a <code>var</code>) <code>setValue()</code> operator functions matching a specific convention. Here is the actual line from <code>Counter()</code>, with nothing renamed or added:</p>
+<pre class="hljs"><code><div><span class="hljs-keyword">var</span> count <span class="hljs-keyword">by</span> remember { mutableIntStateOf(<span class="hljs-number">0</span>) }
+</div></code></pre>
+<p><strong>Important — there is only one name in this line: <code>count</code>.</strong> <code>remember { mutableIntStateOf(0) }</code> evaluates to a <code>MutableIntState</code> object, but that object is never given a name of its own here — it's an anonymous expression on the right of <code>by</code>, the same way <code>2 + 2</code> in <code>val x = 2 + 2</code> never gets its own name either. Kotlin takes that unnamed object and stores it in a hidden backing field that the compiler generates for you (you never see or write its name), and <code>count</code> becomes a property whose <code>get</code>/<code>set</code> are delegated to it.</p>
+<ul>
+<li><code>remember { mutableIntStateOf(0) }</code> produces &quot;the delegate object&quot; — a <code>MutableIntState</code>.</li>
+<li><code>MutableIntState</code> provides <code>getValue</code>/<code>setValue</code> operator extension functions (defined by the Compose runtime library) that satisfy Kotlin's delegation convention.</li>
+<li><code>var count by &lt;the delegate object&gt;</code> makes <code>count</code> a property whose reads and writes are <strong>delegated</strong> to it: writing <code>count</code> actually calls the delegate object's <code>getValue()</code>, and writing <code>count = x</code> actually calls its <code>setValue(x)</code>.</li>
+</ul>
+<p><code>by</code> doesn't change <em>what</em> happens (it's still ultimately calling the delegate's getter/setter) — it only changes the <em>syntax</em>, making a delegated property read and write like an ordinary local variable, with no separate name for the underlying object ever needed. This is purely a readability/ergonomics feature; the underlying Observer-pattern behavior from A1 is exactly the same whether or not <code>by</code> is used.</p>
+<p><strong><code>by</code> is optional.</strong> You can write the exact same behavior without it, by keeping the <code>remember { ... }</code> result in an explicitly named variable instead of delegating to it:</p>
+<pre class="hljs"><code><div><span class="hljs-comment">// With property delegation (idiomatic) — only one name exists: count</span>
+<span class="hljs-keyword">var</span> count <span class="hljs-keyword">by</span> remember { mutableIntStateOf(<span class="hljs-number">0</span>) }
+...
+Text(text = <span class="hljs-string">&quot;<span class="hljs-variable">$count</span>&quot;</span>, fontSize = <span class="hljs-number">72.</span>sp)
+Button(onClick = { count += <span class="hljs-number">1</span> }) { ... }
+
+<span class="hljs-comment">// Without it — same behavior, no delegation, two names now exist: countState and its .value</span>
+<span class="hljs-keyword">val</span> countState = remember { mutableIntStateOf(<span class="hljs-number">0</span>) }
+...
+Text(text = <span class="hljs-string">&quot;<span class="hljs-subst">${countState.value}</span>&quot;</span>, fontSize = <span class="hljs-number">72.</span>sp)
+Button(onClick = { countState.value += <span class="hljs-number">1</span> }) { ... }
+</div></code></pre>
+<p>These two versions behave identically — same recomposition, same triggering event. <code>countState</code> in the second version is just an ordinary variable name the programmer chose, exactly like naming any other <code>val</code>. There's nothing Compose-specific about that name; it could be <code>holder</code>, <code>x</code>, or <code>myCounterBox</code>.</p>
+<p><strong>Takeaway:</strong> <code>remember { mutableStateOf(...) }</code> is what gives Compose an object it can <em>observe</em> (Observer pattern — A1); <code>by</code> is purely a Kotlin syntax feature that lets that observed object's value be read and written using ordinary property syntax, without ever needing to give the object its own name (Delegation pattern — A2). The two patterns solve two different problems and happen to be combined in almost every line of Compose state code, which is why they show up together so often that it's easy to mistake them for one single Compose-specific idea.</p>
+<h3 id="a3-the-same-three-apps-in-vanilla-javascript">A3. The same three apps in vanilla JavaScript</h3>
+<p>Vanilla JavaScript — plain HTML + JS, with no framework like React, Vue, or Svelte — is worth adding as a <strong>third data point</strong>, because the browser's DOM API is imperative in exactly the same sense as Android Views: elements are live, stateful objects, you fetch a reference to one and mutate its properties by hand, and nothing re-runs automatically when your data changes.</p>
+<p><strong><code>Display0</code> — vanilla JS:</strong></p>
+<pre class="hljs"><code><div><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-keyword">html</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">style</span>=<span class="hljs-string">&quot;display:flex; justify-content:center; align-items:center; height:100vh;&quot;</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;numberText&quot;</span> <span class="hljs-attr">style</span>=<span class="hljs-string">&quot;font-size:72px;&quot;</span>&gt;</span>0<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span>
+</div></code></pre>
+<p>There is no JavaScript file at all needed for this one — same as <code>Display0</code>'s <code>MainActivity.kt</code>, which only calls <code>setContentView</code> and never touches <code>numberText</code> again. The &quot;0&quot; is static HTML content, exactly the way it was a static <code>android:text=&quot;0&quot;</code> attribute in XML.</p>
+<p><strong><code>IncreasingCounter</code> — vanilla JS:</strong></p>
+<pre class="hljs"><code><div><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-keyword">html</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">style</span>=<span class="hljs-string">&quot;display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh;&quot;</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;counterText&quot;</span> <span class="hljs-attr">style</span>=<span class="hljs-string">&quot;font-size:72px;&quot;</span>&gt;</span>0<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;addButton&quot;</span> <span class="hljs-attr">style</span>=<span class="hljs-string">&quot;margin-top:16px;&quot;</span>&gt;</span>Add+1<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+
+  <span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="language-javascript">
+    <span class="hljs-keyword">let</span> count = <span class="hljs-number">0</span>;
+
+    <span class="hljs-keyword">const</span> counterText = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&quot;counterText&quot;</span>);
+    <span class="hljs-keyword">const</span> addButton = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&quot;addButton&quot;</span>);
+
+    addButton.<span class="hljs-title function_">addEventListener</span>(<span class="hljs-string">&quot;click&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+      count += <span class="hljs-number">1</span>;
+      counterText.<span class="hljs-property">textContent</span> = count;
+    });
+  </span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span>
+</div></code></pre>
+<p><strong><code>ChangeName</code> — vanilla JS:</strong></p>
+<pre class="hljs"><code><div><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-keyword">html</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">style</span>=<span class="hljs-string">&quot;display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh;&quot;</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;greetingText&quot;</span> <span class="hljs-attr">style</span>=<span class="hljs-string">&quot;font-size:24px;&quot;</span>&gt;</span>Hello, World<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;nameField&quot;</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;text&quot;</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;World&quot;</span> <span class="hljs-attr">style</span>=<span class="hljs-string">&quot;margin-top:16px;&quot;</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;changeButton&quot;</span> <span class="hljs-attr">style</span>=<span class="hljs-string">&quot;margin-top:16px;&quot;</span>&gt;</span>Change<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+
+  <span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="language-javascript">
+    <span class="hljs-keyword">const</span> initialName = <span class="hljs-string">&quot;World&quot;</span>;
+
+    <span class="hljs-keyword">const</span> greetingText = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&quot;greetingText&quot;</span>);
+    <span class="hljs-keyword">const</span> nameField = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&quot;nameField&quot;</span>);
+    <span class="hljs-keyword">const</span> changeButton = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&quot;changeButton&quot;</span>);
+
+    greetingText.<span class="hljs-property">textContent</span> = <span class="hljs-string">&quot;Hello, &quot;</span> + initialName;
+    nameField.<span class="hljs-property">value</span> = initialName;
+
+    changeButton.<span class="hljs-title function_">addEventListener</span>(<span class="hljs-string">&quot;click&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+      greetingText.<span class="hljs-property">textContent</span> = <span class="hljs-string">&quot;Hello, &quot;</span> + nameField.<span class="hljs-property">value</span>;
+    });
+  </span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span>
+</div></code></pre>
+<p><strong>Line-by-line correspondence table:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Concept</th>
+<th>Android Views (Kotlin)</th>
+<th>Vanilla JavaScript</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Get a reference to a live widget/element</td>
+<td><code>findViewById&lt;TextView&gt;(R.id.counterText)</code></td>
+<td><code>document.getElementById(&quot;counterText&quot;)</code></td>
+</tr>
+<tr>
+<td>A widget's own internal state</td>
+<td><code>counterText.text</code></td>
+<td><code>counterText.textContent</code></td>
+</tr>
+<tr>
+<td>An editable field's current value</td>
+<td><code>nameField.text</code></td>
+<td><code>nameField.value</code></td>
+</tr>
+<tr>
+<td>Register a callback for a tap/click</td>
+<td><code>addButton.setOnClickListener { ... }</code></td>
+<td><code>addButton.addEventListener(&quot;click&quot;, () =&gt; { ... })</code></td>
+</tr>
+<tr>
+<td>App-level state, invisible to any widget</td>
+<td><code>private var count = 0</code> (an <code>Activity</code> field)</td>
+<td><code>let count = 0</code> (a variable in the enclosing script scope)</td>
+</tr>
+<tr>
+<td>Pushing a changed value into the UI</td>
+<td><code>counterText.text = &quot;$count&quot;</code> (written by hand)</td>
+<td><code>counterText.textContent = count</code> (written by hand)</td>
+</tr>
+</tbody>
+</table>
+<p>Every single row of that table is something the <em>programmer</em> does by writing a line of code that says &quot;go update this specific element now.&quot; Nothing in vanilla JS or in Android Views watches <code>count</code> and decides on its own that <code>counterText</code> needs to change. This is also historically accurate: this is exactly the pain point that motivated the creation of frameworks like React (open-sourced in 2013) in the frontend world, which introduced the same declarative, &quot;UI as a function of state,&quot; automatic-re-render idea that Jetpack Compose (stable release in 2021, citing React and similar frameworks as an influence) later brought to Android. <strong>Vanilla JS today is where Android Views has always been; React (and other modern JS frameworks) is where Compose is.</strong></p>
+<p>If you've used React, Vue, or Svelte before: think about how that framework decides when to re-render a piece of UI. Every mainstream answer maps onto the same two ideas covered in this document — some notion of observable/reactive state, and some mechanism for automatically re-running a UI description when that state changes. The vocabulary differs (React calls it &quot;re-rendering a component,&quot; Vue calls it &quot;reactivity,&quot; Compose calls it &quot;recomposition&quot;) but the underlying idea — and the imperative pain it's solving — is the same.</p>
+<h3 id="a4-the-same-three-apps-in-react">A4. The same three apps in React</h3>
+<p>React is the frontend framework that popularized the declarative, &quot;describe the UI as a function of state, and let the framework re-render when that state changes&quot; model, and it's the framework most often named as an influence on Compose's design.</p>
+<p><strong><code>JetPackDisplay0</code> → React <code>DisplayZero</code>:</strong></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">function</span> <span class="hljs-title function_">DisplayZero</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">return</span> (
+    <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{</span> <span class="hljs-attr">display:</span> &quot;<span class="hljs-attr">flex</span>&quot;, <span class="hljs-attr">justifyContent:</span> &quot;<span class="hljs-attr">center</span>&quot;, <span class="hljs-attr">alignItems:</span> &quot;<span class="hljs-attr">center</span>&quot;, <span class="hljs-attr">height:</span> &quot;<span class="hljs-attr">100vh</span>&quot; }}&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{</span> <span class="hljs-attr">fontSize:</span> &quot;<span class="hljs-attr">72px</span>&quot; }}&gt;</span>0<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+  );
+}
+</div></code></pre>
+<p>Same as the Compose version: no state, no event handlers, nothing that could ever cause a re-render.</p>
+<p><strong><code>JetPackIncreasingCounter</code> → React <code>Counter</code>:</strong></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">import</span> { useState } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;react&quot;</span>;
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">Counter</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">const</span> [count, setCount] = <span class="hljs-title function_">useState</span>(<span class="hljs-number">0</span>);
+
+  <span class="hljs-keyword">return</span> (
+    <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{</span> <span class="hljs-attr">display:</span> &quot;<span class="hljs-attr">flex</span>&quot;, <span class="hljs-attr">flexDirection:</span> &quot;<span class="hljs-attr">column</span>&quot;, <span class="hljs-attr">alignItems:</span> &quot;<span class="hljs-attr">center</span>&quot;, <span class="hljs-attr">justifyContent:</span> &quot;<span class="hljs-attr">center</span>&quot;, <span class="hljs-attr">height:</span> &quot;<span class="hljs-attr">100vh</span>&quot; }}&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{</span> <span class="hljs-attr">fontSize:</span> &quot;<span class="hljs-attr">72px</span>&quot; }}&gt;</span>{count}<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span> =&gt;</span> setCount(count + 1)}&gt;Add+1<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+  );
+}
+</div></code></pre>
+<p><strong><code>JetPackChangeName</code> → React <code>ChangeName</code>:</strong></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">import</span> { useState } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;react&quot;</span>;
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">ChangeName</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">const</span> initialName = <span class="hljs-string">&quot;World&quot;</span>;
+  <span class="hljs-keyword">const</span> [greetingName, setGreetingName] = <span class="hljs-title function_">useState</span>(initialName);
+  <span class="hljs-keyword">const</span> [fieldValue, setFieldValue] = <span class="hljs-title function_">useState</span>(initialName);
+
+  <span class="hljs-keyword">return</span> (
+    <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{</span> <span class="hljs-attr">display:</span> &quot;<span class="hljs-attr">flex</span>&quot;, <span class="hljs-attr">flexDirection:</span> &quot;<span class="hljs-attr">column</span>&quot;, <span class="hljs-attr">alignItems:</span> &quot;<span class="hljs-attr">center</span>&quot;, <span class="hljs-attr">justifyContent:</span> &quot;<span class="hljs-attr">center</span>&quot;, <span class="hljs-attr">height:</span> &quot;<span class="hljs-attr">100vh</span>&quot;, <span class="hljs-attr">padding:</span> &quot;<span class="hljs-attr">16px</span>&quot; }}&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{</span> <span class="hljs-attr">fontSize:</span> &quot;<span class="hljs-attr">24px</span>&quot; }}&gt;</span>Hello, {greetingName}<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">input</span>
+        <span class="hljs-attr">value</span>=<span class="hljs-string">{fieldValue}</span>
+        <span class="hljs-attr">onChange</span>=<span class="hljs-string">{(e)</span> =&gt;</span> setFieldValue(e.target.value)}
+        style={{ marginTop: &quot;16px&quot; }}
+      /&gt;
+      <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span> =&gt;</span> setGreetingName(fieldValue)} style={{ marginTop: &quot;16px&quot; }}&gt;
+        Change
+      <span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+  );
+}
+</div></code></pre>
+<p><strong>Line-by-line correspondence table — Compose vs. React:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Concept</th>
+<th>Jetpack Compose (Kotlin)</th>
+<th>React (JSX)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Mark a function as UI-describing</td>
+<td><code>@Composable</code> annotation</td>
+<td>No annotation needed — any function returning JSX is a &quot;component&quot; by convention (capitalized name)</td>
+</tr>
+<tr>
+<td>Create an observable piece of state</td>
+<td><code>remember { mutableStateOf(0) }</code></td>
+<td><code>useState(0)</code></td>
+</tr>
+<tr>
+<td>Read the current value</td>
+<td><code>count</code> (via <code>by</code> delegation) or <code>count.value</code></td>
+<td><code>count</code> (the first element of the pair <code>useState</code> returns)</td>
+</tr>
+<tr>
+<td>Update the value and trigger a re-run</td>
+<td><code>count = it</code> / <code>count += 1</code></td>
+<td><code>setCount(newValue)</code> — you never assign to <code>count</code> directly</td>
+</tr>
+<tr>
+<td>What gets re-run when state changes</td>
+<td>The composable function (or the smallest scope inside it that read the state) — <strong>recomposition</strong></td>
+<td>The component function — <strong>re-render</strong></td>
+</tr>
+<tr>
+<td>Declare a piece of UI</td>
+<td>Calling <code>Text(...)</code>, <code>Button(...)</code>, etc. inside the function body</td>
+<td>Returning JSX (<code>&lt;span&gt;</code>, <code>&lt;button&gt;</code>, etc.) from the function</td>
+</tr>
+<tr>
+<td>Wire up a click</td>
+<td><code>Button(onClick = { ... })</code></td>
+<td><code>&lt;button onClick={() =&gt; { ... }}&gt;</code></td>
+</tr>
+<tr>
+<td>Two-way-bound text field</td>
+<td><code>OutlinedTextField(value = fieldValue, onValueChange = { fieldValue = it })</code></td>
+<td><code>&lt;input value={fieldValue} onChange={(e) =&gt; setFieldValue(e.target.value)} /&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>The one structural difference worth calling out explicitly:</strong> in Compose, <code>count += 1</code> (via <code>by</code>) <em>looks</em> like a plain variable assignment, but — as covered in A2 — it's secretly calling <code>MutableState.setValue()</code> through Kotlin's property delegation. In React, <code>useState</code> doesn't hide this at all: it returns a <code>[value, setValue]</code> pair, and <code>setCount(...)</code> is an explicit, visible function call — there is no way to &quot;accidentally&quot; look like you're mutating <code>count</code> directly, because plain JavaScript has no equivalent to Kotlin's <code>by</code>. <strong>Functionally the two are doing the exact same thing (call a setter that schedules a re-run); Compose's <code>by</code> just makes that setter call invisible at the call site, while React's <code>setCount</code> keeps it visible.</strong> The setter-call-that-triggers-a-rerun is the Observer-pattern behavior (present in both); <code>by</code> hiding it behind ordinary assignment syntax is the Delegation-pattern layer on top (Compose-specific, absent in React).</p>
+<p><strong>The field/greeting split in <code>ChangeName</code> demonstrates the same &quot;skip as much as possible&quot; idea in React too:</strong> typing in the <code>&lt;input&gt;</code> only calls <code>setFieldValue</code>, which only causes whatever part of the component tree reads <code>fieldValue</code> to re-render — in a component this small React re-renders the whole <code>ChangeName</code> function either way, but in a larger component tree, React has its own optimizations (memoization via <code>React.memo</code>, <code>useMemo</code>, <code>useCallback</code>) to avoid re-rendering subtrees that don't depend on the changed state, conceptually parallel to Compose's per-scope skipping described in section 5.4. The mechanism differs in detail, but the motivating problem — &quot;don't redo work for UI that doesn't depend on what changed&quot; — is identical.</p>
+<p><strong>Try it yourself:</strong> if you have access to React DevTools, turn on &quot;highlight updates when components render&quot; (or just add a <code>console.log</code> at the top of <code>Counter</code>) while clicking &quot;Add+1&quot;, and compare what you see to the recomposition trace in section 4.4. Both should show the same pattern: the piece of UI reading the changed state re-runs, the button around it does not need to.</p>
+<h3 id="a5-the-same-three-apps-in-swiftui">A5. The same three apps in SwiftUI</h3>
+<p>SwiftUI is Apple's own declarative UI framework for iOS/macOS/watchOS/tvOS — released in 2019, and one of the frameworks most frequently mentioned (alongside React) as a peer/influence in discussions of Compose's design. It's a particularly close comparison to Compose because both target native mobile UI (unlike React, which targets the browser) and both use a similar &quot;properties that hold state, and a declarative body that's automatically re-evaluated when that state changes&quot; structure.</p>
+<p><strong><code>JetPackDisplay0</code> → SwiftUI <code>DisplayZero</code>:</strong></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">struct</span> <span class="hljs-title class_">DisplayZero</span>: <span class="hljs-title class_ inherited__">View</span> {
+    <span class="hljs-keyword">var</span> body: <span class="hljs-keyword">some</span> <span class="hljs-type">View</span> {
+        <span class="hljs-type">Text</span>(<span class="hljs-string">&quot;0&quot;</span>)
+            .font(.system(size: <span class="hljs-number">72</span>))
+    }
+}
+</div></code></pre>
+<p><strong><code>JetPackIncreasingCounter</code> → SwiftUI <code>CounterView</code>:</strong></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">struct</span> <span class="hljs-title class_">CounterView</span>: <span class="hljs-title class_ inherited__">View</span> {
+    <span class="hljs-meta">@State</span> <span class="hljs-keyword">private</span> <span class="hljs-keyword">var</span> count <span class="hljs-operator">=</span> <span class="hljs-number">0</span>
+
+    <span class="hljs-keyword">var</span> body: <span class="hljs-keyword">some</span> <span class="hljs-type">View</span> {
+        <span class="hljs-type">VStack</span> {
+            <span class="hljs-type">Text</span>(<span class="hljs-string">&quot;<span class="hljs-subst">\(count)</span>&quot;</span>)
+                .font(.system(size: <span class="hljs-number">72</span>))
+            <span class="hljs-type">Button</span>(<span class="hljs-string">&quot;Add+1&quot;</span>) {
+                count <span class="hljs-operator">+=</span> <span class="hljs-number">1</span>
+            }
+        }
+    }
+}
+</div></code></pre>
+<p><strong><code>JetPackChangeName</code> → SwiftUI <code>ChangeNameView</code>:</strong></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">struct</span> <span class="hljs-title class_">ChangeNameView</span>: <span class="hljs-title class_ inherited__">View</span> {
+    <span class="hljs-meta">@State</span> <span class="hljs-keyword">private</span> <span class="hljs-keyword">var</span> greetingName <span class="hljs-operator">=</span> <span class="hljs-string">&quot;World&quot;</span>
+    <span class="hljs-meta">@State</span> <span class="hljs-keyword">private</span> <span class="hljs-keyword">var</span> fieldValue <span class="hljs-operator">=</span> <span class="hljs-string">&quot;World&quot;</span>
+
+    <span class="hljs-keyword">var</span> body: <span class="hljs-keyword">some</span> <span class="hljs-type">View</span> {
+        <span class="hljs-type">VStack</span> {
+            <span class="hljs-type">Text</span>(<span class="hljs-string">&quot;Hello, <span class="hljs-subst">\(greetingName)</span>&quot;</span>)
+                .font(.system(size: <span class="hljs-number">24</span>))
+            <span class="hljs-type">TextField</span>(<span class="hljs-string">&quot;Name&quot;</span>, text: <span class="hljs-variable">$fieldValue</span>)
+                .padding(.top, <span class="hljs-number">16</span>)
+            <span class="hljs-type">Button</span>(<span class="hljs-string">&quot;Change&quot;</span>) {
+                greetingName <span class="hljs-operator">=</span> fieldValue
+            }
+            .padding(.top, <span class="hljs-number">16</span>)
+        }
+        .padding()
+    }
+}
+</div></code></pre>
+<p><strong>Line-by-line correspondence table — Compose vs. SwiftUI:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Concept</th>
+<th>Jetpack Compose (Kotlin)</th>
+<th>SwiftUI (Swift)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Mark something as UI-describing</td>
+<td><code>@Composable</code> annotation on a function</td>
+<td>Conforming a <code>struct</code> to the <code>View</code> protocol</td>
+</tr>
+<tr>
+<td>Create an observable piece of state</td>
+<td><code>remember { mutableStateOf(0) }</code></td>
+<td><code>@State private var count = 0</code></td>
+</tr>
+<tr>
+<td>Read the current value</td>
+<td><code>count</code> (via <code>by</code> delegation)</td>
+<td><code>count</code> (via the <code>@State</code> property wrapper — a different language mechanism, but the same effect: reading <code>count</code> secretly reaches into framework-managed storage)</td>
+</tr>
+<tr>
+<td>Update the value and trigger a re-run</td>
+<td><code>count = it</code> / <code>count += 1</code></td>
+<td><code>count += 1</code> (also looks like plain assignment)</td>
+</tr>
+<tr>
+<td>What gets re-run when state changes</td>
+<td>The composable function (or the smallest scope inside it that read the state) — <strong>recomposition</strong></td>
+<td>The <code>body</code> property is recomputed — SwiftUI's own internal diffing decides what actually needs to redraw</td>
+</tr>
+<tr>
+<td>Declare a piece of UI</td>
+<td>Calling <code>Text(...)</code>, <code>Button(...)</code>, etc. inside the function body</td>
+<td>Returning <code>Text(...)</code>, <code>Button(...)</code>, etc. from the <code>body</code> property, using Swift's <code>@ViewBuilder</code> (implicit here, same mechanism as Compose's trailing-lambda DSL)</td>
+</tr>
+<tr>
+<td>Wire up a tap</td>
+<td><code>Button(onClick = { ... }) { Text(&quot;Add+1&quot;) }</code></td>
+<td><code>Button(&quot;Add+1&quot;) { ... }</code></td>
+</tr>
+<tr>
+<td>Two-way-bound text field</td>
+<td><code>OutlinedTextField(value = fieldValue, onValueChange = { fieldValue = it })</code></td>
+<td><code>TextField(&quot;Name&quot;, text: $fieldValue)</code> — the <code>$</code> prefix creates a <code>Binding</code> automatically</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The most interesting comparison point — <code>by</code> (Compose) vs. <code>@State</code> (SwiftUI) vs. <code>useState</code> (React):</strong> SwiftUI's <code>@State</code> and Kotlin's <code>by remember { mutableStateOf(...) }</code> solve the <em>exact</em> same ergonomics problem the <em>exact</em> same way:</p>
+<ul>
+<li>Kotlin's <code>by</code> is <em>property delegation</em> (a general-purpose language feature, covered in A2) applied to a <code>MutableState</code> object that Compose happens to provide.</li>
+<li>Swift's <code>@State</code> is a <em>property wrapper</em> (a similarly general-purpose Swift language feature — the mechanism is literally named that in the Swift language reference) applied to a value that SwiftUI happens to manage.</li>
+<li>Both let you write <code>count += 1</code> and have it look like a plain variable mutation, while secretly calling into a framework-managed piece of observable state underneath — no visible setter call at all.</li>
+<li>React's <code>useState</code>, by contrast, refuses to hide this: <code>setCount(...)</code> is always an explicit function call.</li>
+</ul>
+<p>So on the specific question of &quot;does the state-update call look like a plain assignment, or an explicit function call?&quot;, <strong>Compose and SwiftUI agree with each other and disagree with React:</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Compose (<code>by</code>)</th>
+<th>SwiftUI (<code>@State</code>)</th>
+<th>React (<code>useState</code>)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>State-update syntax</td>
+<td><code>count += 1</code> (looks like assignment)</td>
+<td><code>count += 1</code> (looks like assignment)</td>
+<td><code>setCount(count + 1)</code> (explicit call)</td>
+</tr>
+<tr>
+<td>Language mechanism used</td>
+<td>Property delegation (Kotlin)</td>
+<td>Property wrappers (Swift)</td>
+<td>Plain function/array destructuring — JavaScript does have accessor properties (<code>get</code>/<code>set</code> on objects), but nothing with <code>by</code>'s or <code>@propertyWrapper</code>'s &quot;attach this to a variable binding automatically&quot; convention, and <code>useState</code> doesn't use accessor properties at all</td>
+</tr>
+<tr>
+<td>What's hidden underneath</td>
+<td>A call into <code>MutableState.setValue()</code></td>
+<td>A call into SwiftUI's internal state storage</td>
+<td>Nothing — it's already explicit</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Takeaway:</strong> whether a state update &quot;looks like&quot; a plain assignment or an explicit function call is a <em>language feature</em> decision (does the language have property delegation or property wrappers available to hide it), not a difference in what conceptually happens at runtime. All three frameworks are doing the same Observer-pattern thing underneath (A1): something is being watched, and something gets automatically re-run when it changes. Compose and SwiftUI both chose to spend a language feature to make that watching invisible at the call site; React chose not to (partly because JavaScript, even with modern additions, has no equivalent language feature to spend).</p>
+<h3 id="a6-the-same-three-apps-in-flutter">A6. The same three apps in Flutter</h3>
+<p>Flutter is Google's own cross-platform UI framework (Android, iOS, web, desktop), written in Dart. It's a natural fourth entry in this comparison because, like Compose and SwiftUI, it targets native app UI directly rather than the browser — but on the specific question this section keeps returning to (does the state-update call look like a plain assignment or an explicit function call?), Flutter's <code>setState</code> sides with React, not with Compose/SwiftUI.</p>
+<p><strong><code>JetPackDisplay0</code> → Flutter <code>DisplayZero</code>:</strong></p>
+<pre class="hljs"><code><div><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DisplayZero</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">StatelessWidget</span> </span>{
+  <span class="hljs-keyword">const</span> DisplayZero({<span class="hljs-keyword">super</span>.key});
+
+  <span class="hljs-meta">@override</span>
+  Widget build(BuildContext context) {
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">const</span> Center(
+      child: Text(<span class="hljs-string">&#x27;0&#x27;</span>, style: TextStyle(fontSize: <span class="hljs-number">72</span>)),
+    );
+  }
+}
+</div></code></pre>
+<p><strong><code>JetPackIncreasingCounter</code> → Flutter <code>CounterWidget</code>:</strong></p>
+<pre class="hljs"><code><div><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CounterWidget</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">StatefulWidget</span> </span>{
+  <span class="hljs-keyword">const</span> CounterWidget({<span class="hljs-keyword">super</span>.key});
+
+  <span class="hljs-meta">@override</span>
+  State&lt;CounterWidget&gt; createState() =&gt; _CounterWidgetState();
+}
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">_CounterWidgetState</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">State</span>&lt;<span class="hljs-title">CounterWidget</span>&gt; </span>{
+  <span class="hljs-built_in">int</span> count = <span class="hljs-number">0</span>;
+
+  <span class="hljs-meta">@override</span>
+  Widget build(BuildContext context) {
+    <span class="hljs-keyword">return</span> Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(<span class="hljs-string">&#x27;<span class="hljs-subst">$count</span>&#x27;</span>, style: <span class="hljs-keyword">const</span> TextStyle(fontSize: <span class="hljs-number">72</span>)),
+        ElevatedButton(
+          onPressed: () {
+            setState(() {
+              count += <span class="hljs-number">1</span>;
+            });
+          },
+          child: <span class="hljs-keyword">const</span> Text(<span class="hljs-string">&#x27;Add+1&#x27;</span>),
+        ),
+      ],
+    );
+  }
+}
+</div></code></pre>
+<p><strong><code>JetPackChangeName</code> → Flutter <code>ChangeNameWidget</code>:</strong></p>
+<pre class="hljs"><code><div><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ChangeNameWidget</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">StatefulWidget</span> </span>{
+  <span class="hljs-keyword">const</span> ChangeNameWidget({<span class="hljs-keyword">super</span>.key});
+
+  <span class="hljs-meta">@override</span>
+  State&lt;ChangeNameWidget&gt; createState() =&gt; _ChangeNameWidgetState();
+}
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">_ChangeNameWidgetState</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">State</span>&lt;<span class="hljs-title">ChangeNameWidget</span>&gt; </span>{
+  <span class="hljs-keyword">static</span> <span class="hljs-keyword">const</span> initialName = <span class="hljs-string">&#x27;World&#x27;</span>;
+  <span class="hljs-built_in">String</span> greetingName = initialName;
+  <span class="hljs-built_in">String</span> fieldValue = initialName;
+
+  <span class="hljs-meta">@override</span>
+  Widget build(BuildContext context) {
+    <span class="hljs-keyword">return</span> Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(<span class="hljs-string">&#x27;Hello, <span class="hljs-subst">$greetingName</span>&#x27;</span>, style: <span class="hljs-keyword">const</span> TextStyle(fontSize: <span class="hljs-number">24</span>)),
+        TextField(
+          controller: TextEditingController(text: fieldValue),
+          onChanged: (value) {
+            setState(() {
+              fieldValue = value;
+            });
+          },
+        ),
+        ElevatedButton(
+          onPressed: () {
+            setState(() {
+              greetingName = fieldValue;
+            });
+          },
+          child: <span class="hljs-keyword">const</span> Text(<span class="hljs-string">&#x27;Change&#x27;</span>),
+        ),
+      ],
+    );
+  }
+}
+</div></code></pre>
+<p><strong>Line-by-line correspondence table — Compose vs. Flutter:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Concept</th>
+<th>Jetpack Compose (Kotlin)</th>
+<th>Flutter (Dart)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Mark something as UI-describing</td>
+<td><code>@Composable</code> annotation on a function</td>
+<td>Extending <code>StatelessWidget</code> or <code>StatefulWidget</code> and overriding <code>build()</code></td>
+</tr>
+<tr>
+<td>Create a piece of state that survives recomposition</td>
+<td><code>remember { mutableStateOf(0) }</code></td>
+<td>A plain field (<code>int count = 0</code>) on a separate <code>State&lt;T&gt;</code> object that Flutter keeps alive across rebuilds</td>
+</tr>
+<tr>
+<td>Read the current value</td>
+<td><code>count</code> (via <code>by</code> delegation)</td>
+<td><code>count</code> (a completely ordinary field read — no property wrapper or delegation involved)</td>
+</tr>
+<tr>
+<td>Update the value and trigger a re-run</td>
+<td><code>count = it</code> / <code>count += 1</code> (looks like plain assignment; secretly calls a setter)</td>
+<td><code>setState(() { count += 1; })</code> — mutating the field alone does <strong>not</strong> trigger a rebuild; you must explicitly wrap the mutation in <code>setState</code></td>
+</tr>
+<tr>
+<td>What gets re-run when state changes</td>
+<td>The composable function (or the smallest scope inside it that read the state) — <strong>recomposition</strong></td>
+<td>The widget's <code>build()</code> method — Flutter calls this &quot;rebuilding the widget&quot;</td>
+</tr>
+<tr>
+<td>Declare a piece of UI</td>
+<td>Calling <code>Text(...)</code>, <code>Button(...)</code>, etc. inside the function body</td>
+<td>Returning <code>Text(...)</code>, <code>Column(...)</code>, etc. from <code>build()</code></td>
+</tr>
+<tr>
+<td>Wire up a tap</td>
+<td><code>Button(onClick = { ... })</code></td>
+<td><code>ElevatedButton(onPressed: () { ... })</code></td>
+</tr>
+<tr>
+<td>Two-way-bound text field</td>
+<td><code>OutlinedTextField(value = fieldValue, onValueChange = { fieldValue = it })</code></td>
+<td><code>TextField(controller: ..., onChanged: (value) { ... })</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>The key structural difference — Flutter does NOT hide the &quot;notify&quot; step:</strong> in Compose (<code>by</code>) and SwiftUI (<code>@State</code>), simply writing <code>count += 1</code> is enough — the property wrapper/delegation machinery secretly calls the framework's setter for you, so the mutation <em>is</em> the notification. In Flutter, this is <strong>not</strong> true: <code>count += 1</code> on its own, outside of <code>setState</code>, mutates the field but never tells Flutter to rebuild anything — the screen would silently go stale. <code>setState(() { ... })</code> is Flutter's explicit, visible equivalent of &quot;I just changed something, please rebuild&quot; — structurally the same idea as React's <code>setCount(...)</code>, just wrapping a block of code instead of taking a new value directly.</p>
+<p><strong>Four-way summary table:</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Compose (<code>by</code>)</th>
+<th>SwiftUI (<code>@State</code>)</th>
+<th>React (<code>useState</code>)</th>
+<th>Flutter (<code>setState</code>)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>State-update syntax</td>
+<td><code>count += 1</code> (looks like assignment)</td>
+<td><code>count += 1</code> (looks like assignment)</td>
+<td><code>setCount(count + 1)</code> (explicit call)</td>
+<td><code>setState(() { count += 1; })</code> (explicit call wrapping the mutation)</td>
+</tr>
+<tr>
+<td>Is the &quot;notify&quot; step hidden?</td>
+<td>Yes — hidden behind property delegation</td>
+<td>Yes — hidden behind a property wrapper</td>
+<td>No — always an explicit call</td>
+<td>No — always an explicit call</td>
+</tr>
+<tr>
+<td>What happens if you forget the framework-specific part</td>
+<td>Impossible to forget — assignment always goes through the delegate</td>
+<td>Impossible to forget — assignment always goes through the wrapper</td>
+<td><code>count</code> itself can't be reassigned directly — <code>const [count, setCount] = useState(...)</code> makes <code>count</code> a <code>const</code>, so <code>count = count + 1</code> is a compile error, not a silent bug. The real footgun is different: forgetting to call <code>setCount</code> at all in a handler (nothing happens, screen just doesn't update), or mutating an object/array <em>returned by</em> <code>useState</code> in place instead of replacing it (e.g. <code>list.push(x)</code> instead of <code>setList([...list, x])</code>) — React won't notice the mutation happened</td>
+<td>Nothing updates on screen; <code>count</code> changes on the field but <code>build()</code> never re-runs, because mutating a plain field compiles and runs fine on its own</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Why this matters:</strong> a Compose or SwiftUI developer <em>cannot</em> forget to notify the framework, because the language feature makes that impossible by construction; a Flutter developer <em>can</em>, because <code>count += 1</code> on a plain mutable field compiles and runs fine while silently never triggering a rebuild — a live, real version of exactly the kind of &quot;state changed but nobody told the UI&quot; bug shown throughout sections 1, 4, and 5 for imperative Views code. React's version of &quot;forgetting&quot; is not quite the same shape, though: because <code>count</code> is bound with <code>const</code>, directly reassigning it is a compile error, not a silent runtime bug — the closest real equivalent in React is forgetting to call <code>setCount</code> inside an event handler at all (which just means the handler does nothing visible), or in-place-mutating an object/array held in state instead of replacing it (a more advanced but very real React bug, since React only detects a <em>new</em> value was passed to <code>setX</code>, not that an old one changed shape).</p>
+<p><strong>Note on React Native:</strong> React Native is React's component model (<code>useState</code>, JSX, functions returning UI) running against a different renderer — native <code>View</code>/<code>Text</code>/<code>TextInput</code> components instead of DOM elements — but the state-management story is otherwise identical to A4: <code>setState</code>-style updates are just as explicit, and there is no property-wrapper or delegation magic. It isn't covered separately here because it wouldn't add anything to the comparison beyond what Flutter already shows: a framework that targets native mobile UI while still keeping the &quot;notify&quot; step fully explicit.</p>
+<h3 id="a7-lazycolumnlazyrow-and-the-key-parameter">A7. <code>LazyColumn</code>/<code>LazyRow</code> and the <code>key</code> parameter</h3>
+<p>This section goes beyond the three example apps in this document, and beyond lists in general — it answers a question that comes up naturally once you start using <code>LazyColumn</code>/<code>LazyRow</code> (Compose's scrollable-list composables) for real data: <strong>if you reorder a list — or reorder it and insert a few new items — does Compose recompose every visible item, or does it reuse what it can?</strong></p>
+<p>The answer depends entirely on whether <code>items(...)</code> is given a <code>key</code>.</p>
+<p><strong>Without a <code>key</code> (the default):</strong></p>
+<pre class="hljs"><code><div>LazyColumn {
+    items(myList) { item -&gt;
+        ItemRow(item)
+    }
+}
+</div></code></pre>
+<p>Each item's identity inside the lazy list is tied to its <strong>position (index)</strong>, not its content. If the list is reordered, Compose compares old-index-0 vs. new-index-0, old-index-1 vs. new-index-1, and so on — from its point of view, &quot;the item at index 0 changed from A to B.&quot; Since the composable's input changed at every reordered position, <strong>every composable at a changed position recomposes</strong>. For a full reversal or shuffle, that's effectively the entire visible list. Inserting an item near the front is even worse: every item after the insertion point shifts by one position, so every one of them looks &quot;changed&quot; and recomposes too — even though none of them conceptually changed at all.</p>
+<p><strong>With a stable <code>key</code>:</strong></p>
+<pre class="hljs"><code><div>LazyColumn {
+    items(myList, key = { item -&gt; item.id }) { item -&gt;
+        ItemRow(item)
+    }
+}
+</div></code></pre>
+<p>Now each item is identified by its <code>key</code>, not its position. This turns the diffing into genuine <strong>keyed list reconciliation</strong> — the same concept, and the same reason, behind React's <code>key</code> prop on list items (see A4). Given an old list <code>[A, B, C]</code> and a new list <code>[C, D, A, B]</code> (reordered, with <code>D</code> newly inserted):</p>
+<ul>
+<li><strong>Items whose key is still present</strong> (<code>A</code>, <code>B</code>, <code>C</code>): their composable instances are <strong>reused and moved</strong> to their new position. They are <strong>not recomposed</strong>, and any <code>remember</code>ed state inside them survives the move intact.</li>
+<li><strong>The new item</strong> (<code>D</code>): its key didn't exist before, so there's no existing composable to reuse — Compose composes it for the first time at its new position. That's an <em>initial</em> composition, not a recomposition of something that already existed.</li>
+<li>Nothing else is touched.</li>
+</ul>
+<p><strong>Takeaway:</strong> <code>key</code> is what lets &quot;recomposition skips as much as possible&quot; (the core idea from section 5.4) hold up even when a list's <em>order</em> changes, not just when individual values change. Without a <code>key</code>, Compose has no way to distinguish &quot;this item moved&quot; from &quot;this item's content changed,&quot; so it falls back to the conservative, expensive assumption — recompose everything at every position that looks different. This is also why <code>key</code> matters beyond raw performance: it's what lets <code>LazyColumn</code> correctly preserve scroll position and per-item state (like a checkbox's checked state) when the underlying data reorders.</p>
+
+</body>
+</html>
