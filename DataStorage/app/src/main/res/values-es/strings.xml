@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">JetPackLanguagePreference</string>
+    <string name="greeting">¡Hola!</string>
+    <string name="language_label">Idioma</string>
+    <string name="language_english">Inglés</string>
+    <string name="language_spanish">Español</string>
+    <string name="language_vi">Vietnamita</string>
+    <string name="language_fr">Francés</string>
+</resources>

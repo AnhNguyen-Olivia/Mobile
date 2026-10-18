@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">JetPackLanguagePreference</string>
+    <string name="greeting">Xin Chào!</string>
+    <string name="language_label">Ngôn Ngữ</string>
+    <string name="language_english">Tiếng Anh</string>
+    <string name="language_spanish">Tiếng Tây Ban Nha</string>
+    <string name="language_vi">Tiếng Việt</string>
+    <string name="language_fr">Tiếng Pháp</string>
+</resources>
